@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Habitat</title>
+<meta name="theme-color" content="#EEF1E8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111A1D" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Habitat">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #EEF1E8; --surface: #F8F9F4; --ink: #1F2B26; --muted: #56645D; --rule: #D2D9CE;
+  --sandy: #9A5D16; --sandy-fill: #CF9440; --sandy-tint: #F4E5C9;
+  --cat: #17646C; --cat-fill: #3E9AA3; --cat-tint: #D3EBEA;
+  --sandy-btn: #9A5D16; --cat-btn: #17646C; --on-btn: #FFFFFF;
+  --sky-top: #CDE4EA; --sky-bottom: #F2E7CB;
+  --ground: #D9B56A; --grass: #8FA54A; --acacia: #6E7B3E; --water: #5FAFC4; --water-hi: #A7DCE6; --water-deep: #4C9DB3;
+  --reed: #6F8A3A; --cattail: #7A5A35; --lily: #6FA05A;
+  --m-thriving: #2F8F4E; --m-happy: #69A843; --m-hungry: #D5901A; --m-sad: #5B7FB0; --m-droopy: #8C939B;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111A1D; --surface: #172328; --ink: #E6ECE7; --muted: #9AA9A3; --rule: #2A383D;
+    --sandy: #E9AE5E; --sandy-tint: #2C2417; --cat: #6CCAD1; --cat-tint: #12292D; --sandy-btn: #E9AE5E; --cat-btn: #6CCAD1; --on-btn: #10181B;
+    --sky-top: #0F2230; --sky-bottom: #2C3D46;
+    --ground: #9C7A3C; --grass: #6C8237; --acacia: #4E5A2C; --water: #2F7487; --water-hi: #5DA6B8; --water-deep: #255F70;
+    --reed: #556B2C; --cattail: #5E4429; --lily: #4F7A40;
+    --m-thriving: #5CC27A; --m-happy: #8BCB63; --m-hungry: #F0B04A; --m-sad: #8AA9D6; --m-droopy: #A3AAB2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111A1D; --surface: #172328; --ink: #E6ECE7; --muted: #9AA9A3; --rule: #2A383D;
+  --sandy: #E9AE5E; --sandy-tint: #2C2417; --cat: #6CCAD1; --cat-tint: #12292D; --sandy-btn: #E9AE5E; --cat-btn: #6CCAD1; --on-btn: #10181B;
+  --sky-top: #0F2230; --sky-bottom: #2C3D46;
+  --ground: #9C7A3C; --grass: #6C8237; --acacia: #4E5A2C; --water: #2F7487; --water-hi: #5DA6B8; --water-deep: #255F70;
+  --reed: #556B2C; --cattail: #5E4429; --lily: #4F7A40;
+  --m-thriving: #5CC27A; --m-happy: #8BCB63; --m-hungry: #F0B04A; --m-sad: #8AA9D6; --m-droopy: #A3AAB2;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: inherit; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 400 1rem/1.45 "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.wrap { max-width: 760px; margin: 0 auto; padding: 14px 16px 120px; }
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 6px 2px 14px; }
+.brand { margin: 0; font-size: 2rem; line-height: 1; font-weight: 800; font-stretch: 78%; letter-spacing: -0.015em; }
+.today { color: var(--muted); font-size: .9375rem; text-align: right; }
+.banner { margin: 0 0 14px; padding: 10px 14px; border-radius: 14px; border: 1.5px dashed var(--rule); color: var(--muted); font-size: .875rem; }
+.banner.error { border-style: solid; border-color: var(--m-hungry); color: var(--ink); }
+.h { margin: 0; font-size: 1.125rem; font-weight: 700; letter-spacing: -0.01em; }
+.fine { margin: 0; font-size: .8125rem; color: var(--muted); }
+
+/* Pets */
+.scene { display: grid; grid-template-columns: 1fr 1fr; border-radius: 28px; overflow: hidden; background: linear-gradient(var(--sky-top), var(--sky-bottom)); }
+.scene svg { display: block; width: 100%; height: auto; }
+.pet-svg.mood-droopy { filter: saturate(.4); }
+.pet-svg.mood-sad { filter: saturate(.75); }
+.ground { fill: var(--ground); } .grass { stroke: var(--grass); } .acacia { fill: var(--acacia); stroke: var(--acacia); }
+.water { fill: var(--water); opacity: .92; } .water-hi { stroke: var(--water-hi); } .water-deep { fill: var(--water-deep); }
+.reed { stroke: var(--reed); } .cattail { fill: var(--cattail); } .lily { fill: var(--lily); }
+
+.status { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.sandy { --accent: var(--sandy); --fill: var(--sandy-fill); --tint: var(--sandy-tint); --btn: var(--sandy-btn); }
+.cat { --accent: var(--cat); --fill: var(--cat-fill); --tint: var(--cat-tint); --btn: var(--cat-btn); }
+.who { padding: 14px 14px 16px; border-radius: 20px; background: var(--tint); min-width: 0; }
+.who h2 { margin: 0; font-size: 1.625rem; line-height: 1.05; font-weight: 800; font-stretch: 85%; color: var(--accent); }
+.owner { margin: 2px 0 12px; font-size: .8125rem; color: var(--muted); }
+.row-split { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+.stage { font-weight: 700; }
+.num { font-variant-numeric: tabular-nums; }
+.meter { height: 8px; border-radius: 99px; background: color-mix(in srgb, var(--fill) 22%, transparent); margin: 6px 0 4px; overflow: hidden; }
+.meter span { display: block; height: 100%; border-radius: inherit; background: var(--fill); }
+.mood { margin-top: 12px; font-weight: 700; display: flex; align-items: center; gap: 7px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--mood); flex: none; }
+.note { margin: 10px 0 0; font-family: "Caveat", "Bradley Hand", "Segoe Print", cursive; font-weight: 600; font-size: 1.3rem; line-height: 1.1; }
+
+.tug { margin-top: 10px; padding: 16px; border-radius: 20px; border: 1.5px solid var(--rule); }
+.tug-scores { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; font-weight: 700; }
+.tug-scores b { font-size: 2rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.tug-scores .sandy b { color: var(--sandy); } .tug-scores .cat b { color: var(--cat); }
+.rope { display: flex; gap: 3px; height: 12px; margin: 10px 0; border-radius: 99px; overflow: hidden; }
+.rope span { min-width: 6px; transition: flex-grow .4s ease; }
+.rope .s { background: var(--sandy-fill); } .rope .c { background: var(--cat-fill); }
+
+/* Log */
+.log-head { margin: 4px 0 16px; }
+.field { display: grid; justify-items: start; gap: 8px; margin-bottom: 16px; }
+.field > span { font-weight: 600; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface); border: 1px solid var(--rule); }
+.seg button, .seg label { border: 0; background: none; padding: 8px 14px; border-radius: 10px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--btn, var(--ink)); color: var(--on-btn); }
+.seg .pick { position: relative; overflow: hidden; display: inline-flex; align-items: center; }
+.seg .pick input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; cursor: pointer; }
+.seg .pick.on { background: var(--btn, var(--ink)); color: var(--on-btn); }
+.seg .pick:focus-within { outline: 3px solid var(--ink); outline-offset: 2px; }
+.habits { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 8px; }
+.habit { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--rule); background: var(--surface); text-align: left; cursor: pointer; }
+.habit[aria-pressed="true"] { background: var(--tint); border-color: var(--fill); }
+.box { width: 26px; height: 26px; flex: none; border-radius: 8px; border: 2px solid var(--rule); display: grid; place-items: center; color: var(--on-btn); }
+.box svg { width: 16px; height: 16px; opacity: 0; }
+.habit[aria-pressed="true"] .box { background: var(--btn); border-color: var(--btn); }
+.habit[aria-pressed="true"] .box svg { opacity: 1; }
+.habit .name { flex: 1; font-weight: 600; }
+.habit .pts { font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
+.save { display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
+.primary { border: 0; border-radius: 14px; padding: 14px 22px; background: var(--btn); color: var(--on-btn); font-weight: 800; font-size: 1.0625rem; cursor: pointer; }
+.primary:disabled { opacity: .6; cursor: progress; }
+.total { font-weight: 700; }
+.total b { font-size: 1.5rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+.save-note { margin-top: 10px; }
+
+/* Scores */
+.block { margin-top: 26px; }
+.block > .h { margin-bottom: 10px; }
+.chart { display: block; width: 100%; height: auto; }
+.chart text { fill: var(--muted); font-family: inherit; }
+.legend { display: flex; gap: 16px; margin-bottom: 6px; font-size: .875rem; font-weight: 600; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; background: var(--fill); }
+.table-wrap { overflow-x: auto; }
+table.rec { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.rec th, .rec td { padding: 10px 6px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+.rec th:first-child, .rec td:first-child { text-align: left; color: var(--muted); font-weight: 500; white-space: normal; }
+.rec thead th { font-weight: 800; border-bottom-width: 2px; }
+.rec thead th.sandy { color: var(--sandy); } .rec thead th.cat { color: var(--cat); }
+.rec td { font-weight: 700; }
+.consistency { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.consistency h3 { margin: 0 0 8px; font-size: 1rem; color: var(--accent); }
+.hab { margin-bottom: 10px; }
+.hab .row-split { font-size: .875rem; }
+.hab .meter { margin-top: 4px; height: 6px; }
+
+/* Tabs and toast */
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; gap: 6px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--rule); }
+.tabs button { flex: 0 1 132px; display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: none; color: var(--muted); font-size: .8125rem; font-weight: 700; padding: 6px 10px; border-radius: 14px; cursor: pointer; }
+.tabs button[aria-current="page"] { color: var(--ink); background: var(--surface); }
+.tabs svg { width: 24px; height: 24px; }
+.toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px); z-index: 30;
+  max-width: min(92vw, 420px); padding: 12px 16px; border-radius: 14px; background: var(--ink); color: var(--paper); font-weight: 600;
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 420px) {
+  .wrap { padding-left: 12px; padding-right: 12px; }
+  .who { padding: 12px 11px 14px; }
+  .who h2 { font-size: 1.45rem; }
+  .note { font-size: 1.2rem; }
+  .consistency { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast, .rope span { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 class="brand">The Habitat</h1>
+    <span class="today" id="todayLabel"></span>
+  </header>
+  <p class="banner" id="banner" hidden></p>
+
+  <section class="view" id="view-pets" aria-label="Pets">
+    <div class="scene" id="scene"></div>
+    <div class="status" id="status"></div>
+    <div class="tug" id="tug"></div>
+  </section>
+
+  <section class="view" id="view-log" aria-label="Log a day" hidden>
+    <h2 class="h log-head">Log a day</h2>
+    <div class="field"><span>Who’s logging</span><div class="seg" id="whoSeg"></div></div>
+    <div class="field"><span>Day</span><div class="seg" id="daySeg"></div></div>
+    <ul class="habits" id="habitList"></ul>
+    <div class="save">
+      <button class="primary" id="saveBtn" type="button">Save day</button>
+      <span class="total" id="dayTotal"></span>
+    </div>
+    <p class="fine save-note" id="saveNote"></p>
+  </section>
+
+  <section class="view" id="view-scores" aria-label="Scores" hidden>
+    <div class="tug" id="tug2"></div>
+    <div class="block"><h2 class="h">Points each week</h2><div id="weekChart"></div></div>
+    <div class="block"><h2 class="h">Records</h2><div class="table-wrap"><table class="rec" id="records"></table></div></div>
+    <div class="block"><h2 class="h">Habits over the last 30 days</h2><div class="consistency" id="consistency"></div></div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Sections">
+  <button type="button" data-view="pets" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="5" ry="4.2"/><circle cx="5.5" cy="10.5" r="2.1"/><circle cx="9.5" cy="6" r="2.1"/><circle cx="14.5" cy="6" r="2.1"/><circle cx="18.5" cy="10.5" r="2.1"/></svg><span>Pets</span></button>
+  <button type="button" data-view="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M8 12.5l3 3 5-6"/></svg><span>Log</span></button>
+  <button type="button" data-view="scores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg><span>Scores</span></button>
+</nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ---------- Pet artwork: hand-built SVG, no images ---------- */
+const Pets = (() => {
+  const INK = "#1E1712";
+  const DOG = { tan: "#CF9440", dark: "#2F2620", cream: "#F4E8CC", earIn: "#E8C892", snout: "#3A2E26" };
+  const OTT = { fur: "#7E4F2B", dark: "#5B3719", cream: "#EED9B6", nose: "#2A1A10", whisker: "#F3E4C8", egg: "#8A5A33", belly: "#A06C42" };
+  const PINK = "#EE7A8B", BLUSH = "#F29C9C", TEAR = "#7FC1EE";
+  // Overall size and head-to-body ratio for each stage (0 = egg)
+  const STAGE = [null, { s: 0.6, h: 1.3 }, { s: 0.8, h: 1.12 }, { s: 1, h: 1 }, { s: 1.05, h: 1 }];
+  const still = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const ease = n => Array(n).fill(".45 0 .55 1").join(";");
+  const times = n => Array.from({ length: n }, (_, i) => +(i / (n - 1)).toFixed(3)).join(";");
+
+  function spin(a, b, dur, cx, cy) {
+    if (still()) return "";
+    return `<animateTransform attributeName="transform" type="rotate" values="${a} ${cx} ${cy};${b} ${cx} ${cy};${a} ${cx} ${cy}" keyTimes="${times(3)}" dur="${dur}s" repeatCount="indefinite" calcMode="spline" keySplines="${ease(2)}"/>`;
+  }
+  function bob(dy, dur) {
+    if (still() || !dy) return "";
+    return `<animateTransform attributeName="transform" type="translate" values="0 0;0 ${-dy};0 0" keyTimes="${times(3)}" dur="${dur}s" repeatCount="indefinite" calcMode="spline" keySplines="${ease(2)}"/>`;
+  }
+  function rise(dur, begin, dist) {
+    return `<animateTransform attributeName="transform" type="translate" values="0 0;0 ${-dist}" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/>` +
+      `<animate attributeName="opacity" values="0;1;0" dur="${dur}s" begin="${begin}s" repeatCount="indefinite"/>`;
+  }
+
+  /* ---- shared face parts ---- */
+  function eyes(mood, pts, r) {
+    if (mood === "thriving") return pts.map(([x, y]) => `<path d="M${x - 5} ${y + 1.5} Q${x} ${y - 5} ${x + 5} ${y + 1.5}" fill="none" stroke="${INK}" stroke-width="2.6" stroke-linecap="round"/>`).join("");
+    if (mood === "droopy") return pts.map(([x, y]) => `<path d="M${x - 5} ${y} Q${x} ${y + 3.5} ${x + 5} ${y}" fill="none" stroke="${INK}" stroke-width="2.4" stroke-linecap="round"/>`).join("");
+    const up = mood === "hungry" ? -1.2 : 0;
+    return pts.map(([x, y]) => `<circle cx="${x}" cy="${y + up}" r="${r}" fill="${INK}"/><circle cx="${x + 1.4}" cy="${y + up - 1.5}" r="1.45" fill="#fff"/>`).join("");
+  }
+  const brows = ([l, r]) => `<path d="M${l[0] - 6} ${l[1] - 6} L${l[0] + 4} ${l[1] - 10} M${r[0] - 4} ${r[1] - 10} L${r[0] + 6} ${r[1] - 6}" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>`;
+  const blush = ([l, r]) => `<ellipse cx="${l[0]}" cy="${l[1]}" rx="5.5" ry="3.2" fill="${BLUSH}" opacity=".6"/><ellipse cx="${r[0]}" cy="${r[1]}" rx="5.5" ry="3.2" fill="${BLUSH}" opacity=".6"/>`;
+  function tear(x, y) {
+    const a = still() ? "" : `<animateTransform attributeName="transform" type="translate" values="0 0;0 10" dur="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;1;0" keyTimes="0;.6;1" dur="2.2s" repeatCount="indefinite"/>`;
+    return `<path d="M${x} ${y} c-3 4.5 -3.6 7.5 0 7.5 c3.6 0 3 -3 0 -7.5z" fill="${TEAR}">${a}</path>`;
+  }
+  function mouth(mood, x, y) { // x,y = centre of the mouth line
+    switch (mood) {
+      case "thriving": return `<path d="M${x - 9.5} ${y - 1} Q${x - 4.75} ${y + 4} ${x} ${y} Q${x + 4.75} ${y + 4} ${x + 9.5} ${y - 1}" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/><path d="M${x - 3.5} ${y + 1.6} Q${x} ${y + 10} ${x + 3.5} ${y + 1.6}Z" fill="${PINK}"/>`;
+      case "happy": return `<path d="M${x - 8.5} ${y - 0.5} Q${x - 4.25} ${y + 3.5} ${x} ${y + 0.5} Q${x + 4.25} ${y + 3.5} ${x + 8.5} ${y - 0.5}" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>`;
+      case "hungry": return `<ellipse cx="${x}" cy="${y + 3}" rx="2.4" ry="3" fill="${INK}"/>`;
+      case "sad": return `<path d="M${x - 6.5} ${y + 5} Q${x} ${y - 0.5} ${x + 6.5} ${y + 5}" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>`;
+      default: return `<path d="M${x - 6} ${y + 3.5} Q${x} ${y + 1.5} ${x + 6} ${y + 3.5}" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>`;
+    }
+  }
+
+  /* ---- props ---- */
+  const HEART = "M0 4C-7-1-5-8 0-4C5-8 7-1 0 4Z";
+  const bone = (x, y) => `<g fill="#F3E9D6" stroke="#B9A385" stroke-width="1.4"><circle cx="${x - 12}" cy="${y - 4}" r="4.5"/><circle cx="${x - 12}" cy="${y + 4}" r="4.5"/><circle cx="${x + 12}" cy="${y - 4}" r="4.5"/><circle cx="${x + 12}" cy="${y + 4}" r="4.5"/></g><rect x="${x - 12}" y="${y - 3.5}" width="24" height="7" fill="#F3E9D6"/><path d="M${x - 10} ${y - 3.5}H${x + 10}M${x - 10} ${y + 3.5}H${x + 10}" stroke="#B9A385" stroke-width="1.4"/>`;
+  const fish = (x, y, c = "#E8944A") => `<path d="M${x + 8} ${y}l9-6.5v13z" fill="${c}"/><ellipse cx="${x}" cy="${y}" rx="11" ry="6.5" fill="${c}"/><path d="M${x - 1} ${y - 6}q3 6 0 12" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1.2"/><circle cx="${x - 5.5}" cy="${y - 1.5}" r="1.4" fill="${INK}"/>`;
+  const pebble = (x, y) => `<ellipse cx="${x}" cy="${y}" rx="7.5" ry="5.5" fill="#9AA6AC"/><ellipse cx="${x - 2.5}" cy="${y - 2}" rx="2.6" ry="1.5" fill="#fff" opacity=".45"/>`;
+
+  /* ---- where the head ends up, so bubbles and hearts follow it ---- */
+  function headAt(species, stage) {
+    const { s, h } = STAGE[stage];
+    const [px, py, nx, ny, hx, hy, f] = species === "dog" ? [120, 181, 120, 126, 120, 100, 1] : [124, 166, 98, 150, 74, 140, 1.12];
+    const x = nx + (hx - nx) * h, y = ny + (hy - ny) * h;
+    return [px + (x - px) * s * f, py + (y - py) * s * f, s * h * f];
+  }
+
+  function overlays(species, stage, mood) {
+    const [x, y, k] = headAt(species, stage);
+    const at = (dx, dy) => [x + dx * k, y + dy * k];
+    if (mood === "thriving") {
+      const spots = species === "dog" ? [[-26, -36, 0], [30, -40, .8], [4, -54, 1.6]] : [[-14, -34, 0], [26, -38, .8], [6, -50, 1.6]];
+      return spots.map(([dx, dy, d]) => { const [hx, hy] = at(dx, dy);
+        return `<g transform="translate(${hx.toFixed(1)} ${hy.toFixed(1)}) scale(1.2)"><path d="${HEART}" fill="${PINK}" opacity="${still() ? 0.9 : 0}">${still() ? "" : rise(2.4, d, 16)}</path></g>`; }).join("");
+    }
+    if (mood === "droopy") {
+      const [zx, zy] = at(species === "dog" ? 30 : 24, -34);
+      return [[0, 0, 10, 0], [7, -9, 13, 1], [15, -20, 16, 2]].map(([dx, dy, size, d]) =>
+        `<text x="${(zx + dx).toFixed(1)}" y="${(zy + dy).toFixed(1)}" font-size="${size}" font-weight="700" fill="#8EA1B0" opacity="${still() ? 0.9 : 0}" style="font-family:inherit">z${still() ? "" : rise(3, d, 10)}</text>`).join("");
+    }
+    if (mood === "hungry") {
+      const [c1x, c1y] = at(32, -28), [c2x, c2y] = at(44, -42);
+      const bx = Math.min(c2x + 34, 206), by = Math.max(c2y - 26, 32);
+      const icon = species === "dog" ? bone(bx, by) : fish(bx - 2, by, "#5FA3C8");
+      const float = still() ? "" : bob(2, 2.6);
+      return `<g><g>${float}<circle cx="${c1x}" cy="${c1y}" r="3" fill="#fff" stroke="#C9D2D6" stroke-width="1.5"/><circle cx="${c2x}" cy="${c2y}" r="4.6" fill="#fff" stroke="#C9D2D6" stroke-width="1.5"/><ellipse cx="${bx}" cy="${by}" rx="28" ry="19" fill="#fff" stroke="#C9D2D6" stroke-width="1.5"/>${icon}</g></g>`;
+    }
+    return "";
+  }
+
+  /* ---- scenery: savanna on the left, river on the right ---- */
+  function savanna() {
+    const tuft = (x, y) => `<path d="M${x} ${y}l-3.5-8M${x} ${y}l.5-10M${x} ${y}l4.5-7.5" class="grass" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+    return `<g class="acacia"><path d="M44 152 L45 130 M45 136 L36 127 M45 133 L55 125" stroke-width="2.4" stroke-linecap="round" fill="none"/><ellipse cx="45" cy="125" rx="25" ry="6.5"/><ellipse cx="38" cy="121" rx="13" ry="4"/></g>
+      <path class="ground" d="M-4 170C60 162 170 160 244 164V204H-4Z"/>${tuft(22, 172)}${tuft(66, 167)}${tuft(192, 166)}${tuft(226, 168)}`;
+  }
+  function river() {
+    return `<path class="ground" d="M-4 164C8 165 18 168 28 176L34 204H-4Z"/>
+      <rect class="water-deep" x="-4" y="164" width="248" height="40"/>
+      <g class="reed" stroke-width="2" stroke-linecap="round" fill="none"><path d="M10 172V124M18 174V132M4 172V138"/></g>
+      <g class="cattail"><rect x="8" y="122" width="4.5" height="13" rx="2.2"/><rect x="15.8" y="130" width="4.5" height="12" rx="2.2"/></g>
+      <ellipse class="lily" cx="214" cy="170" rx="13" ry="3.6"/>`;
+  }
+  function waterFront() {
+    let d = "M-12 168";
+    for (let i = 0; i < 9; i++) d += " q10 -3.5 20 0 t20 0";
+    const flow = still() ? "" : `<animateTransform attributeName="transform" type="translate" values="0 0;-40 0" dur="5s" repeatCount="indefinite"/>`;
+    return `<g><g>${flow}<path class="water" d="${d} V204 H-12Z"/><path class="water-hi" d="${d}" fill="none" stroke-width="2"/></g></g>`;
+  }
+
+  /* ---- the egg ---- */
+  function egg(species, p) {
+    const dog = species === "dog";
+    const base = dog ? DOG.cream : OTT.egg, ground = dog ? 172 : 160;
+    const y = v => v - 172 + ground;
+    const shape = `M120 ${y(98)}C143 ${y(98)} 152 ${y(134)} 150 ${y(148)}C148 ${y(164)} 135 ${y(174)} 120 ${y(174)}C105 ${y(174)} 92 ${y(164)} 90 ${y(148)}C88 ${y(134)} 97 ${y(98)} 120 ${y(98)}Z`;
+    const spots = dog
+      ? [[106, 126, 9, 6, DOG.dark, -20], [133, 146, 7, 9, DOG.tan, 10], [113, 158, 6, 5, DOG.dark, 0], [135, 119, 5, 4, DOG.tan, 0], [101, 146, 4, 6, DOG.tan, 0], [126, 133, 3.5, 3, DOG.dark, 0]]
+      : [[108, 124, 3, 3, OTT.cream, 0], [128, 116, 2.4, 2.4, OTT.cream, 0], [136, 140, 3.2, 3.2, OTT.cream, 0], [112, 150, 2.6, 2.6, OTT.cream, 0], [126, 160, 3, 3, OTT.cream, 0], [100, 138, 2, 2, OTT.cream, 0], [120, 136, 2, 2, OTT.cream, 0]];
+    const id = "egg" + Math.random().toString(36).slice(2, 7);
+    const crack1 = p > 0.3 ? `<path d="M103 ${y(114)}l7 6-4 6 8 5" fill="none" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>` : "";
+    const crack2 = p > 0.65 ? `<path d="M140 ${y(128)}l-7 5 6 5-7 7" fill="none" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>` : "";
+    const wob = spin(-4, 4, p > 0.65 ? 0.9 : 1.8, 120, ground);
+    const nest = `<ellipse cx="120" cy="${ground + 1}" rx="38" ry="9" fill="#A6873F"/><path d="M86 ${ground - 2}q17 9 34 2t34-2M92 ${ground + 4}q14-6 28 0t28 0" fill="none" stroke="#7E6327" stroke-width="1.6"/>`;
+    return `<ellipse cx="120" cy="${ground + 7}" rx="46" ry="5" fill="#000" opacity=".12"/>${dog ? nest : ""}
+      <g>${wob}<clipPath id="${id}"><path d="${shape}"/></clipPath><path d="${shape}" fill="${base}"/>
+      <g clip-path="url(#${id})">${spots.map(([cx, cy, rx, ry, c, r]) => `<ellipse cx="${cx}" cy="${y(cy)}" rx="${rx}" ry="${ry}" fill="${c}" transform="rotate(${r} ${cx} ${y(cy)})"/>`).join("")}
+      <ellipse cx="108" cy="${y(118)}" rx="6" ry="10" fill="#fff" opacity=".28" transform="rotate(20 108 ${y(118)})"/></g>${crack1}${crack2}</g>${dog ? "" : nest}`;
+  }
+
+  /* ---- African wild dog, sitting ---- */
+  function dog(stage, mood) {
+    const { s, h } = STAGE[stage];
+    const earA = { thriving: 16, happy: 20, hungry: 28, sad: 74, droopy: 132 }[mood];
+    const tailRest = { thriving: 0, happy: 0, hungry: 8, sad: 40, droopy: 64 }[mood];
+    const wag = { thriving: [-16, 14, 0.34], happy: [-8, 10, 0.8], hungry: [-3, 4, 1.8] }[mood];
+    const drop = { sad: 3, droopy: 7 }[mood] || 0, tilt = mood === "droopy" ? 8 : 0;
+    const jump = { thriving: [7, 0.7], happy: [2.5, 1.6] }[mood] || [0, 1];
+    const id = "dg" + Math.random().toString(36).slice(2, 7);
+    const ear = (x, a) => `<g transform="translate(${x} 80) rotate(${a})"><ellipse cx="0" cy="-21" rx="14" ry="22" fill="${DOG.dark}"/><ellipse cx="0" cy="-19" rx="8" ry="15" fill="${DOG.earIn}"/></g>`;
+    const tailPath = "M150 168C172 170 186 156 190 134";
+    const tail = `<g transform="rotate(${tailRest} 150 168)"><g>${wag ? spin(wag[0], wag[1], wag[2], 150, 168) : ""}
+      <path d="${tailPath}" fill="none" stroke="${DOG.tan}" stroke-width="14" stroke-linecap="round"/>
+      <path d="${tailPath}" pathLength="100" stroke-dasharray="48 52" stroke-dashoffset="-52" fill="none" stroke="${DOG.dark}" stroke-width="14" stroke-linecap="round"/>
+      <circle cx="190" cy="133" r="8.5" fill="#FBF6EC"/></g></g>`;
+    const silhouette = `<ellipse cx="96" cy="166" rx="19" ry="14"/><ellipse cx="144" cy="166" rx="19" ry="14"/><ellipse cx="120" cy="146" rx="26" ry="31"/>`;
+    const blobs = [[101, 150, 9, 7, DOG.dark, -25], [139, 158, 8, 6, DOG.dark, 20], [89, 171, 8, 5, DOG.dark, 0], [150, 172, 7, 5, DOG.dark, 0], [124, 170, 5, 4, DOG.dark, 0],
+      [106, 166, 5, 3.5, DOG.cream, 0], [152, 160, 4, 3, DOG.cream, 0], [86, 160, 3.5, 3, DOG.cream, 0]];
+    const body = `<g fill="${DOG.tan}">${silhouette}</g><clipPath id="${id}">${silhouette}</clipPath>
+      <g clip-path="url(#${id})">${blobs.map(([x, y, rx, ry, c, r]) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${c}" transform="rotate(${r} ${x} ${y})"/>`).join("")}
+      <ellipse cx="120" cy="134" rx="12" ry="14" fill="${DOG.cream}"/></g>
+      <g fill="${DOG.tan}"><rect x="106" y="150" width="12" height="29" rx="6"/><rect x="122" y="150" width="12" height="29" rx="6"/></g>
+      <clipPath id="${id}l"><rect x="106" y="150" width="12" height="29" rx="6"/><rect x="122" y="150" width="12" height="29" rx="6"/></clipPath>
+      <g clip-path="url(#${id}l)"><ellipse cx="109" cy="161" rx="6" ry="4.5" fill="${DOG.dark}" transform="rotate(-20 109 161)"/><ellipse cx="129" cy="167" rx="6.5" ry="4" fill="${DOG.dark}" transform="rotate(15 129 167)"/><ellipse cx="131" cy="155" rx="3" ry="2.5" fill="${DOG.cream}"/></g>
+      <g fill="${DOG.cream}"><ellipse cx="112" cy="178.5" rx="8" ry="4.5"/><ellipse cx="128" cy="178.5" rx="8" ry="4.5"/><ellipse cx="84" cy="179" rx="10" ry="4.5"/><ellipse cx="156" cy="179" rx="10" ry="4.5"/></g>
+      ${stage === 4 ? `<path d="M97 123H143L120 149Z" fill="#C8463D"/><g fill="#F6E7D0"><circle cx="110" cy="129" r="1.7"/><circle cx="130" cy="129" r="1.7"/><circle cx="120" cy="139" r="1.7"/></g>` : ""}`;
+    const E = [[106, 93], [134, 93]];
+    const face = `${eyes(mood, E, 4.3)}${mood === "sad" ? brows(E) + tear(104, 99) : ""}${mood === "thriving" || mood === "happy" ? blush([[100, 109], [140, 109]]) : ""}${mouth(mood, 120, 117)}`;
+    const hat = stage === 1 ? `<path d="M102 79C102 59 138 59 138 79L133 74.5 128 79.5 123 74.5 118 79.5 113 74.5 108 79.5Z" fill="${DOG.cream}" stroke="#D5C29C" stroke-width="1"/><ellipse cx="113" cy="69" rx="3.5" ry="2.5" fill="${DOG.dark}"/><ellipse cx="127" cy="66" rx="3" ry="2.2" fill="${DOG.tan}"/>` : "";
+    const head = `<g transform="translate(0 ${drop}) rotate(${tilt} 120 126)"><g transform="translate(120 126) scale(${h}) translate(-120 -126)">
+      ${ear(104, -earA)}${ear(136, earA)}
+      <circle cx="120" cy="100" r="30" fill="${DOG.tan}"/>
+      <path d="M120 71V97" stroke="${DOG.dark}" stroke-width="6" stroke-linecap="round"/>
+      <ellipse cx="120" cy="106" rx="12.5" ry="8.5" fill="${DOG.snout}"/>
+      <ellipse cx="120" cy="102.8" rx="5.6" ry="3.8" fill="#120D0A"/><ellipse cx="118.3" cy="101.6" rx="1.7" ry="1" fill="#fff" opacity=".7"/>
+      ${face}${hat}</g></g>`;
+    return `<g transform="translate(120 181) scale(${s}) translate(-120 -181)">
+      <ellipse cx="120" cy="181" rx="58" ry="6" fill="#000" opacity=".14"/>
+      <g>${bob(jump[0], jump[1])}${tail}${body}${head}</g></g>`;
+  }
+
+  /* ---- Otter, floating on its back ---- */
+  function otter(stage, mood) {
+    const { s, h } = STAGE[stage];
+    const sink = { sad: 3, droopy: 9 }[mood] || 0;
+    const float = { thriving: [4, 1.4], happy: [2.5, 2.2], hungry: [1.5, 3], sad: [1, 3.6], droopy: [0.6, 4.2] }[mood];
+    const held = mood === "thriving" ? fish(113, 131) : mood === "happy" || stage >= 3 && mood !== "droopy" && mood !== "hungry" ? pebble(113, 134) : "";
+    const E = [[64, 133], [84, 133]];
+    const face = `${eyes(mood, E, 3.9)}${mood === "sad" ? brows(E) + tear(62, 138) : ""}${mood === "thriving" || mood === "happy" ? blush([[57, 148], [91, 148]]) : ""}${mouth(mood, 74, 149)}`;
+    const hat = stage === 1
+      ? `<path d="M58 121C58 101 90 101 90 121L85 116.5 80 121.5 74 116.5 68 121.5 63 116.5Z" fill="${OTT.egg}" stroke="#6E4524" stroke-width="1"/><g fill="${OTT.cream}"><circle cx="68" cy="110" r="1.8"/><circle cx="79" cy="107" r="1.5"/><circle cx="83" cy="114" r="1.3"/></g>`
+      : stage === 4 ? `<g transform="rotate(-10 74 117)"><path d="M57 117Q74 96 91 117Z" fill="#F7F5EE" stroke="#C8CDD2" stroke-width="1"/><rect x="53" y="114" width="42" height="6.5" rx="3.2" fill="#1F2D3D"/><circle cx="74" cy="108" r="3.4" fill="#E3B23C"/></g>` : "";
+    const head = `<g transform="translate(98 150) scale(${h}) translate(-98 -150)">
+      <circle cx="55" cy="122" r="5.5" fill="${OTT.dark}"/><circle cx="93" cy="122" r="5.5" fill="${OTT.dark}"/>
+      <circle cx="74" cy="140" r="25" fill="${OTT.fur}"/>
+      <ellipse cx="74" cy="149" rx="16.5" ry="11" fill="${OTT.cream}"/>
+      <g stroke="${OTT.whisker}" stroke-width="1.1" stroke-linecap="round" opacity=".9"><path d="M60 147.5L45 144.5M60 150.5L45 151.5M88 147.5L103 144.5M88 150.5L103 151.5"/></g>
+      <ellipse cx="74" cy="142.5" rx="6.2" ry="4.3" fill="${OTT.nose}"/><ellipse cx="72.4" cy="141.4" rx="1.8" ry="1" fill="#fff" opacity=".6"/>
+      ${face}${hat}</g>`;
+    return `<g transform="translate(124 166) scale(${s * 1.12}) translate(-124 -166)"><g transform="translate(0 ${sink})"><g>${bob(float[0], float[1])}
+      <ellipse cx="170" cy="144" rx="6" ry="11" transform="rotate(-24 170 144)" fill="${OTT.dark}"/><ellipse cx="184" cy="148" rx="6" ry="11" transform="rotate(-8 184 148)" fill="${OTT.dark}"/>
+      <path d="M176 158C194 151 210 151 224 153C210 161 194 166 178 168Z" fill="${OTT.fur}"/>
+      <ellipse cx="130" cy="160" rx="56" ry="20" fill="${OTT.fur}"/><ellipse cx="126" cy="152" rx="38" ry="9" fill="${OTT.belly}"/>
+      ${held}<g fill="${OTT.dark}"><ellipse cx="105" cy="141" rx="7" ry="5.5"/><ellipse cx="120" cy="139.5" rx="7" ry="5.5"/></g>
+      ${head}</g></g></g>`;
+  }
+
+  function draw(species, stage, mood, opts = {}) {
+    const art = stage === 0 ? egg(species, opts.progress || 0) : species === "dog" ? dog(stage, mood) : otter(stage, mood);
+    const scene = species === "dog" ? savanna() : river();
+    const front = species === "otter" ? waterFront() : "";
+    const extra = stage === 0 ? "" : overlays(species, stage, mood);
+    const cls = stage === 0 ? "egg" : mood;
+    return `<svg class="pet-svg mood-${cls}" viewBox="0 10 240 190" role="img" aria-label="${opts.label || ""}">${scene}${art}${front}${extra}</svg>`;
+  }
+  return { draw };
+})();
+
+</script>
+<script>
+/* ======================= SETTINGS: edit these ======================= */
+
+// Google Form + Sheet links. Leave CSV_URL blank to see made-up demo data.
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSRE8sRzU8vletUUgbiFNdOm6Dd4HWxMnVUoSQUcNa6m-gw5TcVwRsSqeBQBA2wB9ZQA2OljQ8EXJp-/pub?output=csv";
+const FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSeZIbSOAD24_vt1kDZLwTpsLihAyx7JZ9ZrSXyiwOgc-g61Iw/formResponse";
+const ENTRY = { who: "entry.1964647304", date: "entry.602429836", habits: "entry.1895740769" };
+
+// Your habits. pts = points for doing it on a given day.
+// Keep both lists adding up to about the same total so it's a fair fight.
+const PEOPLE = [
+  { name: "Sandy", pet: "dog", petName: "Kibo", weeklyTarget: 45, habits: [
+    { name: "Meditate", pts: 4 },
+    { name: "Bed by 11", pts: 2 },
+    { name: "Journal", pts: 2 },
+    { name: "Push-ups", pts: 2 },
+  ] },
+  { name: "Cat", pet: "otter", petName: "Pebble", weeklyTarget: 45, habits: [
+    { name: "Stretch or yoga", pts: 2 },
+    { name: "Planning", pts: 2 },
+    { name: "Meditate", pts: 3 },
+    { name: "Chin-up training", pts: 3 },
+  ] },
+];
+
+// Total points needed to reach each stage: egg, baby, young, grown, legend.
+const STAGE_POINTS = [0, 10, 150, 400, 900];
+const STAKES = "Loser of the week cooks Sunday dinner";
+
+/* ==================================================================== */
+
+const SPECIES = {
+  dog: { latin: "Lycaon pictus", stages: ["Egg", "Pup", "Yearling", "Hunter", "Pack leader"], ate: "wolfed down" },
+  otter: { latin: "Lutra lutra", stages: ["Egg", "Kit", "Paddler", "Diver", "Raft captain"], ate: "munched through" },
+};
+const MOODS = [
+  { key: "thriving", min: 1, label: "Thriving" },
+  { key: "happy", min: 0.7, label: "Happy" },
+  { key: "hungry", min: 0.4, label: "Peckish" },
+  { key: "sad", min: 0.15, label: "Sad" },
+  { key: "droopy", min: -1, label: "Droopy" },
+];
+const NOTES = {
+  dog: {
+    thriving: n => `${n}’s doing zoomies round the acacia.`,
+    happy: n => `${n}’s tail hasn’t stopped wagging.`,
+    hungry: n => `${n}’s eyeing up the biscuit tin.`,
+    sad: n => `${n}’s ears have gone flat. A habit or two would help.`,
+    droopy: n => `${n}’s flopped in the shade. Log something to perk things up.`,
+  },
+  otter: {
+    thriving: n => `${n}’s floating belly-up with a fresh fish.`,
+    happy: n => `${n}’s juggling a favourite pebble.`,
+    hungry: n => `${n} keeps diving for fish and coming up empty.`,
+    sad: n => `${n}’s drifting about looking glum.`,
+    droopy: n => `${n}’s barely afloat. Log a habit, quick.`,
+  },
+};
+
+/* ---------- small helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const fromYmd = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = fromYmd(s); d.setDate(d.getDate() + n); return ymd(d); };
+const daysBetween = (a, b) => Math.round((fromYmd(b) - fromYmd(a)) / 864e5);
+const weekOf = s => { const d = fromYmd(s); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return ymd(d); };
+const today = () => ymd(new Date());
+const fmt = (s, o) => fromYmd(s).toLocaleDateString("en-GB", o);
+const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+const theme = p => (p === PEOPLE[0] ? "sandy" : "cat");
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("habitat:" + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem("habitat:" + k, JSON.stringify(v)); } catch (e) { /* private mode: keep it in memory */ } },
+};
+
+/* ---------- habits travel through the form as "Name:3|Other:2" ---------- */
+const cleanName = s => String(s).replace(/[|:]/g, "-").trim();
+const encode = list => (list.length ? list.map(h => `${cleanName(h.name)}:${h.pts}`).join("|") : "none");
+function decode(text, person) {
+  if (!text || text.trim().toLowerCase() === "none") return [];
+  return text.split("|").map(part => {
+    const i = part.lastIndexOf(":");
+    const name = (i > 0 ? part.slice(0, i) : part).trim();
+    let pts = i > 0 ? parseFloat(part.slice(i + 1)) : NaN;
+    if (!isFinite(pts)) { const h = person.habits.find(x => cleanName(x.name) === name); pts = h ? h.pts : 1; }
+    return { name, pts };
+  }).filter(h => h.name);
+}
+
+/* ---------- reading the published sheet ---------- */
+function parseCSV(text) {
+  const rows = []; let row = [], field = "", quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (quoted) {
+      if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+      else if (c === '"') quoted = false;
+      else field += c;
+    } else if (c === '"') quoted = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+    else if (c !== "\r") field += c;
+  }
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+function sheetDate(s) {
+  s = (s || "").trim();
+  let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) return new Date(+m[3], m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) return new Date(+m[1], m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
+  return null;
+}
+function rowsFromCSV(text) {
+  const table = parseCSV(text).filter(r => r.some(c => c.trim()));
+  if (!table.length) return [];
+  const head = table[0].map(h => h.trim().toLowerCase());
+  const col = (...words) => head.findIndex(h => words.some(w => h.includes(w)));
+  const cTs = col("timestamp"), cWho = col("who", "name"), cDate = col("date"), cHab = col("habit");
+  return table.slice(1).map((r, i) => {
+    const person = PEOPLE.find(p => p.name.toLowerCase() === (r[cWho] || "").trim().toLowerCase());
+    const d = sheetDate(r[cDate]);
+    if (!person || !d) return null;
+    const ts = sheetDate(r[cTs]);
+    return { who: person.name, day: ymd(d), habits: decode(r[cHab], person), raw: (r[cHab] || "").trim(), ts: ts ? ts.getTime() : 0, order: i };
+  }).filter(Boolean);
+}
+
+/* ---------- made-up data for demo mode ---------- */
+function demoRows() {
+  let seed = 11;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const rows = [], t = today();
+  PEOPLE.forEach((p, pi) => {
+    for (let i = 44; i >= 1; i--) {
+      const day = addDays(t, -i);
+      const rate = pi === 0 ? (i <= 4 ? 0.2 : 0.8) : 0.85;
+      const done = p.habits.filter(() => rnd() < rate).map(h => ({ name: cleanName(h.name), pts: h.pts }));
+      rows.push({ who: p.name, day, habits: done, raw: encode(done), ts: fromYmd(day).getTime() + 72e6, order: rows.length });
+    }
+  });
+  return rows;
+}
+
+/* ---------- state ---------- */
+const DEMO = !CSV_URL;
+const LOCAL_KEY = DEMO ? "demo" : "pending";
+const state = {
+  rows: DEMO ? demoRows() : [],
+  local: store.get(LOCAL_KEY, []),
+  me: store.get("me", PEOPLE[0].name),
+  day: null, picks: null, picksKey: null,
+  view: "pets", loading: !DEMO, message: "",
+};
+
+function localRows() {
+  if (!DEMO) state.local = state.local.filter(r => Date.now() - r.ts < 6 * 36e5);
+  return state.local.map((r, i) => ({ ...r, order: 1e9 + i }));
+}
+function latestByDay() {
+  const map = new Map();
+  state.rows.concat(localRows()).sort((a, b) => a.ts - b.ts || a.order - b.order).forEach(r => map.set(r.who + "|" + r.day, r));
+  return map;
+}
+
+/* ---------- the numbers behind each pet ---------- */
+function statsFor(p, latest, t) {
+  const pts = {}, habitDays = {};
+  latest.forEach(r => {
+    if (r.who !== p.name || r.day > t) return;
+    pts[r.day] = r.habits.reduce((a, h) => a + h.pts, 0);
+    r.habits.forEach(h => (habitDays[h.name] = habitDays[h.name] || new Set()).add(r.day));
+  });
+  const days = Object.keys(pts).sort();
+  const scored = days.filter(d => pts[d] > 0);
+  const first = scored[0] || null;
+  const total = days.reduce((a, d) => a + pts[d], 0);
+  let week7 = 0;
+  for (let i = 0; i < 7; i++) week7 += pts[addDays(t, -i)] || 0;
+  const target = p.weeklyTarget * (first ? Math.min(7, daysBetween(first, t) + 1) : 7) / 7;
+  const mood = MOODS.find(m => week7 / target >= m.min);
+  let stage = 0;
+  STAGE_POINTS.forEach((v, i) => { if (total >= v) stage = i; });
+  const next = STAGE_POINTS[stage + 1];
+  const progress = next ? (total - STAGE_POINTS[stage]) / (next - STAGE_POINTS[stage]) : 1;
+  let streak = 0;
+  for (let d = pts[t] > 0 ? t : addDays(t, -1); pts[d] > 0; d = addDays(d, -1)) streak++;
+  let best = 0, run = 0, prev = null;
+  scored.forEach(d => { run = prev && addDays(prev, 1) === d ? run + 1 : 1; best = Math.max(best, run); prev = d; });
+  const span = first ? Math.min(30, daysBetween(first, t) + 1) : 0;
+  let sum30 = 0;
+  for (let i = 0; i < span; i++) sum30 += pts[addDays(t, -i)] || 0;
+  const weeks = {};
+  days.forEach(d => { const w = weekOf(d); weeks[w] = (weeks[w] || 0) + pts[d]; });
+  return { p, pts, habitDays, first, total, week7, target, mood, stage, next, progress, streak, best,
+    bestDay: Math.max(0, ...days.map(d => pts[d])), avg30: span ? sum30 / span : 0, span, weeks };
+}
+function weeksWon(stats, t) {
+  const wins = stats.map(() => 0);
+  const firsts = stats.map(s => s.first).filter(Boolean).sort();
+  if (!firsts.length) return wins;
+  for (let w = weekOf(firsts[0]); w < weekOf(t); w = addDays(w, 7)) {
+    const v = stats.map(s => s.weeks[w] || 0), top = Math.max(...v);
+    if (top > 0 && v.filter(x => x === top).length === 1) wins[v.indexOf(top)]++;
+  }
+  return wins;
+}
+
+/* ---------- drawing the page ---------- */
+function petCard(s) {
+  const sp = SPECIES[s.p.pet], egg = s.stage === 0;
+  const toNext = s.next ? s.next - s.total : 0;
+  const note = egg ? `Something’s wriggling in there. ${plural(toNext, "more point")} to hatch.` : NOTES[s.p.pet][s.mood.key](esc(s.p.petName));
+  const pct = Math.round(s.progress * 100);
+  return `<article class="who ${theme(s.p)}">
+    <h2>${esc(s.p.petName)}</h2>
+    <p class="owner">${esc(s.p.name)}’s <i>${sp.latin}</i></p>
+    <div class="row-split"><span class="stage">${sp.stages[s.stage]}</span><span class="num fine">${s.total} pts</span></div>
+    <div class="meter" role="progressbar" aria-label="Growth to next stage" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><span style="width:${pct}%"></span></div>
+    <p class="fine">${s.next ? `${toNext} more to ${sp.stages[s.stage + 1]}` : "Fully grown"}</p>
+    <p class="mood"><span class="dot" style="--mood:var(--m-${egg ? "droopy" : s.mood.key})"></span>${egg ? "Waiting to hatch" : s.mood.label}</p>
+    <p class="fine num">${s.week7} of ${Math.round(s.target)} pts in the last 7 days</p>
+    <p class="note">${note}</p>
+  </article>`;
+}
+function tugOfWar(stats, t) {
+  const w = weekOf(t), v = stats.map(s => s.weeks[w] || 0), sum = v[0] + v[1];
+  const left = sum ? v[0] / sum : 0.5;
+  const daysLeft = 6 - daysBetween(w, t);
+  const lead = v[0] === v[1] ? "Neck and neck" : `${esc(stats[v[0] > v[1] ? 0 : 1].p.name)} leads by ${Math.abs(v[0] - v[1])}`;
+  return `<div class="row-split"><h2 class="h">This week</h2><span class="fine">${daysLeft ? `${plural(daysLeft, "day")} to go` : "Last day"}</span></div>
+    <div class="tug-scores"><span class="sandy">${esc(stats[0].p.name)} <b>${v[0]}</b></span><span class="cat"><b>${v[1]}</b> ${esc(stats[1].p.name)}</span></div>
+    <div class="rope" aria-hidden="true"><span class="s" style="flex-grow:${left}"></span><span class="c" style="flex-grow:${1 - left}"></span></div>
+    <p class="fine">${lead}. ${esc(STAKES)}.</p>`;
+}
+
+function renderPets(stats, t) {
+  $("#scene").innerHTML = stats.map(s => {
+    const sp = SPECIES[s.p.pet];
+    const label = `${s.p.petName}, ${sp.stages[s.stage]}, ${s.stage ? s.mood.label : "waiting to hatch"}`;
+    return `<div>${Pets.draw(s.p.pet, s.stage, s.mood.key, { progress: s.progress, label: esc(label) })}</div>`;
+  }).join("");
+  $("#status").innerHTML = stats.map(petCard).join("");
+  $("#tug").innerHTML = tugOfWar(stats, t);
+}
+
+const CHECK = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg>`;
+function me() { return PEOPLE.find(p => p.name === state.me) || PEOPLE[0]; }
+function dayName(d, t) { return d === t ? "today" : d === addDays(t, -1) ? "yesterday" : fmt(d, { weekday: "long", day: "numeric", month: "short" }); }
+
+function renderLog(latest, t) {
+  const p = me();
+  if (!state.day || state.day > t) state.day = t;
+  const key = p.name + "|" + state.day, saved = latest.get(key);
+  if (state.picksKey !== key) { state.picks = new Set(saved ? saved.habits.map(h => h.name) : []); state.picksKey = key; }
+  $("#whoSeg").innerHTML = PEOPLE.map(x => `<button type="button" class="${theme(x)}" data-who="${esc(x.name)}" aria-pressed="${x === p}">${esc(x.name)}</button>`).join("");
+  const y = addDays(t, -1), other = state.day !== t && state.day !== y;
+  $("#daySeg").innerHTML = `<button type="button" data-day="${t}" aria-pressed="${state.day === t}">Today</button>
+    <button type="button" data-day="${y}" aria-pressed="${state.day === y}">Yesterday</button>
+    <label class="pick${other ? " on" : ""}"><span>${other ? fmt(state.day, { weekday: "short", day: "numeric", month: "short" }) : "Earlier"}</span><input type="date" id="dayPick" max="${t}" value="${other ? state.day : ""}" aria-label="Pick an earlier day"></label>`;
+  $("#view-log").className = "view " + theme(p);
+  $("#habitList").innerHTML = p.habits.map(h => {
+    const n = cleanName(h.name);
+    return `<li><button type="button" class="habit" data-h="${esc(n)}" aria-pressed="${state.picks.has(n)}"><span class="box">${CHECK}</span><span class="name">${esc(h.name)}</span><span class="pts">+${h.pts}</span></button></li>`;
+  }).join("");
+  updateTotal();
+  $("#saveNote").textContent = saved ? `Already logged for ${dayName(state.day, t)}. Saving again replaces it.` : "";
+}
+function updateTotal() {
+  const n = me().habits.filter(h => state.picks.has(cleanName(h.name))).reduce((a, h) => a + h.pts, 0);
+  $("#dayTotal").innerHTML = `<b>${n}</b> ${n === 1 ? "point" : "points"}`;
+}
+
+function weekChart(stats, t) {
+  const cur = weekOf(t), first = stats.map(s => s.first).filter(Boolean).sort()[0];
+  const weeks = [];
+  for (let i = 7; i >= 0; i--) { const w = addDays(cur, -7 * i); if (i === 0 || (first && w >= weekOf(first))) weeks.push(w); }
+  const W = 640, H = 230, top = 26, base = H - 34, gw = W / weeks.length, bw = Math.min(30, gw / 3.2);
+  const max = Math.max(10, ...weeks.flatMap(w => stats.map(s => s.weeks[w] || 0)));
+  let svg = `<line x1="0" x2="${W}" y1="${base}" y2="${base}" stroke="var(--rule)" stroke-width="2"/>`;
+  weeks.forEach((w, i) => {
+    stats.forEach((s, j) => {
+      const v = s.weeks[w] || 0, h = (v / max) * (base - top), x = gw * i + gw / 2 + (j ? 2 : -bw - 2);
+      svg += `<rect x="${x.toFixed(1)}" y="${(base - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="5" fill="var(--${theme(s.p)}-fill)"/>`;
+      if (v) svg += `<text x="${(x + bw / 2).toFixed(1)}" y="${(base - h - 7).toFixed(1)}" text-anchor="middle" font-size="19" font-weight="700">${v}</text>`;
+    });
+    svg += `<text x="${(gw * i + gw / 2).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="21">${w === cur ? (weeks.length > 5 ? "Now" : "This week") : fmt(w, { day: "numeric", month: "short" })}</text>`;
+  });
+  return `<div class="legend">${stats.map(s => `<span class="${theme(s.p)}">${esc(s.p.name)}</span>`).join("")}</div>
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points each week for the last ${weeks.length} weeks">${svg}</svg>`;
+}
+
+function renderScores(stats, t) {
+  $("#tug2").innerHTML = tugOfWar(stats, t);
+  $("#weekChart").innerHTML = weekChart(stats, t);
+  const wins = weeksWon(stats, t), w = weekOf(t);
+  const rows = [
+    ["Total points", s => s.total],
+    ["This week", s => s.weeks[w] || 0],
+    ["Weeks won", (s, i) => wins[i]],
+    ["Current streak", s => plural(s.streak, "day")],
+    ["Best streak", s => plural(s.best, "day")],
+    ["Best day", s => `${s.bestDay} pts`],
+    ["Daily average, last 30 days", s => s.avg30.toFixed(1)],
+  ];
+  $("#records").innerHTML = `<thead><tr><th scope="col"><span class="fine">&nbsp;</span></th>${stats.map(s => `<th scope="col" class="${theme(s.p)}">${esc(s.p.name)}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(([label, f]) => `<tr><td>${label}</td>${stats.map((s, i) => `<td>${f(s, i)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  $("#consistency").innerHTML = stats.map(s => {
+    const list = s.span ? s.p.habits.map(h => {
+      const set = s.habitDays[cleanName(h.name)] || new Set();
+      let c = 0;
+      for (let i = 0; i < s.span; i++) if (set.has(addDays(t, -i))) c++;
+      const pct = Math.round((c / s.span) * 100);
+      return `<div class="hab"><div class="row-split"><span>${esc(h.name)}</span><span class="num fine">${c} of ${s.span} days</span></div><div class="meter"><span style="width:${pct}%"></span></div></div>`;
+    }).join("") : `<p class="fine">Nothing logged yet.</p>`;
+    return `<div class="${theme(s.p)}"><h3>${esc(s.p.name)}</h3>${list}</div>`;
+  }).join("");
+}
+
+function render() {
+  const t = today(), latest = latestByDay();
+  const stats = PEOPLE.map(p => statsFor(p, latest, t));
+  $("#todayLabel").textContent = fmt(t, { weekday: "long", day: "numeric", month: "long" });
+  const banner = $("#banner");
+  const msg = state.message || (DEMO ? "Demo mode. These scores are made up, and anything you log stays on this device until the Google Form is connected." : state.loading ? "Fetching the latest scores…" : "");
+  banner.hidden = !msg; banner.textContent = msg; banner.classList.toggle("error", !!state.message);
+  renderPets(stats, t);
+  renderLog(latest, t);
+  renderScores(stats, t);
+  return stats;
+}
+
+/* ---------- saving a day ---------- */
+let toastTimer;
+function toast(text) {
+  const el = $("#toast");
+  el.textContent = text; el.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 3200);
+}
+async function saveDay() {
+  const p = me(), t = today(), day = state.day || t;
+  const habits = p.habits.filter(h => state.picks.has(cleanName(h.name))).map(h => ({ name: cleanName(h.name), pts: h.pts }));
+  const row = { who: p.name, day, habits, raw: encode(habits), ts: Date.now() };
+  const before = statsFor(p, latestByDay(), t);
+  if (!DEMO) {
+    if (!FORM_POST_URL) { toast("Add FORM_POST_URL in the settings to save to Google Sheets."); return; }
+    const body = new URLSearchParams();
+    body.append(ENTRY.who, p.name); body.append(ENTRY.date, day); body.append(ENTRY.habits, row.raw);
+    const btn = $("#saveBtn"); btn.disabled = true;
+    try { await fetch(FORM_POST_URL, { method: "POST", mode: "no-cors", body }); }
+    catch (e) { btn.disabled = false; toast("Couldn’t reach Google Forms. Check your connection and save again."); return; }
+    btn.disabled = false;
+  }
+  state.local.push(row); store.set(LOCAL_KEY, state.local);
+  const after = render().find(s => s.p === p), sp = SPECIES[p.pet], pts = row.habits.reduce((a, h) => a + h.pts, 0);
+  if (after.stage > before.stage) toast(after.stage === 1 ? `${p.petName} hatched! Say hello to your ${sp.stages[1].toLowerCase()}.` : `${p.petName} grew into a ${sp.stages[after.stage]}!`);
+  else if (!pts) toast(`Saved. Nothing logged for ${dayName(day, t)}.`);
+  else toast(`Saved. ${p.petName} ${sp.ate} ${plural(pts, "point")}.`);
+}
+
+/* ---------- loading from Google Sheets ---------- */
+async function refresh() {
+  if (DEMO) return;
+  try {
+    const res = await fetch(CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "t=" + Date.now());
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    if (/^\s*</.test(text)) throw new Error("not CSV");
+    state.rows = rowsFromCSV(text);
+    store.set("cache", text);
+    state.local = state.local.filter(p => !state.rows.some(r => r.who === p.who && r.day === p.day && r.raw === p.raw));
+    store.set(LOCAL_KEY, state.local);
+    state.message = "";
+  } catch (e) {
+    state.message = state.rows.length
+      ? "Showing the last scores this device saw. Couldn’t reach Google Sheets just now."
+      : "Couldn’t load scores from Google Sheets. Check CSV_URL is the ‘Publish to web’ CSV link for the responses sheet.";
+  }
+  state.loading = false;
+  render();
+}
+
+/* ---------- tabs and taps ---------- */
+const VIEWS = ["pets", "log", "scores"];
+function show(view, push) {
+  if (!VIEWS.includes(view)) view = "pets";
+  state.view = view;
+  VIEWS.forEach(v => { $("#view-" + v).hidden = v !== view; });
+  document.querySelectorAll(".tabs button").forEach(b => b.dataset.view === view ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current"));
+  if (push) { try { history.replaceState(null, "", view === "pets" ? location.pathname + location.search : "#" + view); } catch (e) { /* sandboxed preview */ } window.scrollTo(0, 0); }
+}
+document.addEventListener("click", e => {
+  if (e.target.id === "dayPick") { try { e.target.showPicker(); } catch (err) { /* the browser opens its own picker */ } return; }
+  const b = e.target.closest("button");
+  if (!b) return;
+  if (b.dataset.view) show(b.dataset.view, true);
+  else if (b.dataset.who) { state.me = b.dataset.who; store.set("me", state.me); render(); }
+  else if (b.dataset.day) { state.day = b.dataset.day; render(); }
+  else if (b.dataset.h) {
+    const n = b.dataset.h, on = !state.picks.has(n);
+    on ? state.picks.add(n) : state.picks.delete(n);
+    b.setAttribute("aria-pressed", on); updateTotal();
+  } else if (b.id === "saveBtn") saveDay();
+});
+document.addEventListener("change", e => { if (e.target.id === "dayPick" && e.target.value) { state.day = e.target.value; render(); } });
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { render(); refresh(); } });
+
+if (!DEMO) { const cached = store.get("cache", ""); if (cached) state.rows = rowsFromCSV(cached); }
+render();
+show(location.hash.slice(1));
+refresh();
+if (!DEMO) setInterval(() => { if (!document.hidden) refresh(); }, 120000);
+
+</script>
+</body>
+</html>
