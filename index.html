@@ -147,11 +147,41 @@ table.rec { width: 100%; border-collapse: collapse; font-variant-numeric: tabula
 .hab .row-split { font-size: .875rem; }
 .hab .meter { margin-top: 4px; height: 6px; }
 
+/* Shop */
+.wallets { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.wallets .who { border: 2px solid transparent; }
+.wallets .who.shopping { border-color: var(--fill); }
+.wallets h3 { margin: 0; font-size: 1rem; font-weight: 700; color: var(--accent); }
+.credits { margin: 6px 0 4px; font-weight: 700; }
+.credits b { font-size: 2.25rem; font-weight: 800; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.shop-rule { margin-top: 10px; }
+.goods { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 8px; }
+.good, .voucher { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; border: 1.5px solid var(--rule); background: var(--surface); }
+.ico { width: 44px; height: 44px; flex: none; border-radius: 12px; display: grid; place-items: center; font-size: 1.5rem; line-height: 1; background: var(--tint); }
+.what { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.what b { font-weight: 700; line-height: 1.25; }
+.buy { flex: none; display: grid; justify-items: end; gap: 6px; }
+.price { font-size: .875rem; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.small { padding: 8px 14px; border-radius: 11px; font-size: .9375rem; white-space: nowrap; }
+.buy .small { min-width: 5.5rem; }
+.small:disabled { opacity: 1; background: var(--rule); color: var(--muted); cursor: not-allowed; }
+.vouchers { display: grid; gap: 8px; }
+.voucher { display: grid; grid-template-columns: auto 1fr; background: var(--tint); border: 1.5px dashed var(--fill); }
+.voucher .ico { background: var(--surface); }
+.voucher .what b { font-family: "Caveat", "Bradley Hand", "Segoe Print", cursive; font-weight: 600; font-size: 1.45rem; line-height: 1.05; }
+.acts { grid-column: 1 / -1; display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
+@media (min-width: 560px) {
+  .voucher { grid-template-columns: auto 1fr auto; }
+  .acts { grid-column: auto; }
+}
+.ghost { border: 0; background: none; padding: 8px 10px; border-radius: 10px; font-size: .9375rem; font-weight: 700; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.spent { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 6px; font-size: .875rem; color: var(--muted); }
+
 /* Tabs and toast */
 .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; gap: 6px;
   padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
   background: color-mix(in srgb, var(--paper) 86%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--rule); }
-.tabs button { flex: 0 1 132px; display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: none; color: var(--muted); font-size: .8125rem; font-weight: 700; padding: 6px 10px; border-radius: 14px; cursor: pointer; }
+.tabs button { flex: 0 1 120px; display: flex; flex-direction: column; align-items: center; gap: 2px; border: 0; background: none; color: var(--muted); font-size: .8125rem; font-weight: 700; padding: 6px 10px; border-radius: 14px; cursor: pointer; }
 .tabs button[aria-current="page"] { color: var(--ink); background: var(--surface); }
 .tabs svg { width: 24px; height: 24px; }
 .toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 12px); z-index: 30;
@@ -203,12 +233,22 @@ table.rec { width: 100%; border-collapse: collapse; font-variant-numeric: tabula
     <div class="block"><h2 class="h">Records</h2><div class="table-wrap"><table class="rec" id="records"></table></div></div>
     <div class="block"><h2 class="h">Habits over the last 30 days</h2><div class="consistency" id="consistency"></div></div>
   </section>
+
+  <section class="view" id="view-shop" aria-label="Shop" hidden>
+    <h2 class="h log-head">The shop</h2>
+    <div class="field"><span>Who’s shopping</span><div class="seg" id="shopSeg"></div></div>
+    <div class="wallets" id="wallets"></div>
+    <p class="fine shop-rule" id="shopRule"></p>
+    <ul class="goods" id="goods"></ul>
+    <div class="block"><h2 class="h">Vouchers</h2><div id="vouchers"></div></div>
+  </section>
 </div>
 
 <nav class="tabs" aria-label="Sections">
   <button type="button" data-view="pets" aria-current="page"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16" rx="5" ry="4.2"/><circle cx="5.5" cy="10.5" r="2.1"/><circle cx="9.5" cy="6" r="2.1"/><circle cx="14.5" cy="6" r="2.1"/><circle cx="18.5" cy="10.5" r="2.1"/></svg><span>Pets</span></button>
   <button type="button" data-view="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M8 12.5l3 3 5-6"/></svg><span>Log</span></button>
   <button type="button" data-view="scores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4"/></svg><span>Scores</span></button>
+  <button type="button" data-view="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8.5h14l-1 11.5H6L5 8.5z"/><path d="M9 11.5V7a3 3 0 0 1 6 0v4.5"/></svg><span>Shop</span></button>
 </nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -435,16 +475,38 @@ const PEOPLE = [
     { name: "Push-ups", pts: 2 },
   ] },
   { name: "Cat", pet: "otter", petName: "Pebble", weeklyTarget: 45, habits: [
-    { name: "Stretch or yoga", pts: 2 },
-    { name: "Planning", pts: 2 },
-    { name: "Meditate", pts: 3 },
-    { name: "Chin-up training", pts: 3 },
+    { name: "Read for 5 min", pts: 2 },
+    { name: "Dead hang", pts: 2 },
+    { name: "Drink 2L of water", pts: 1 },
+    { name: "In bed by 10:00pm", pts: 1 },
+    { name: "Reply to texts for 5 min", pts: 4 },
   ] },
 ];
 
 // Total points needed to reach each stage: egg, baby, young, grown, legend.
 const STAGE_POINTS = [0, 10, 150, 400, 900];
 const STAKES = "Loser of the week cooks Sunday dinner";
+
+// The shop. Whoever scores the most in a week banks credits to spend here.
+// cost = credits. {them} turns into the other person's name.
+// Change names, blurbs and prices freely, but leave an id alone once someone has bought it.
+const CREDITS_PER_WIN = 1;
+const SHOP = [
+  { id: "pint", icon: "🍺", name: "A pint at the pub", cost: 1, blurb: "{them} gets the round in. You pick the pub." },
+  { id: "egg", icon: "🥚", name: "Pickled egg dare", cost: 1, blurb: "{them} eats a whole pickled egg while you watch. No spitting, no chaser." },
+  { id: "pudding", icon: "🍨", name: "Pudding run", cost: 1, blurb: "{them} heads out for the pudding of your choice, whatever the weather." },
+  { id: "right", icon: "📜", name: "‘You were right’ certificate", cost: 1, blurb: "{them} says it out loud, and means it, about a topic you choose." },
+  { id: "liein", icon: "🛌", name: "Lie-in with a brew", cost: 1, blurb: "{them} gets up first and brings you tea or coffee in bed." },
+  { id: "film", icon: "🍿", name: "Film night, your rules", cost: 1, blurb: "You pick the film. {them} brings the snacks and has no veto." },
+  { id: "massage", icon: "💆", name: "30-minute massage", cost: 2, blurb: "Half an hour of {them}’s finest work. Timer on, phones away." },
+  { id: "bath", icon: "🛁", name: "Immersive bath experience", cost: 2, blurb: "Candles, bubbles, a playlist and a drink within reach. {them} runs it, you soak." },
+  { id: "craft", icon: "🎨", name: "Craft night", cost: 2, blurb: "An evening making something together. {them} sorts the supplies and the snacks." },
+  { id: "breakfast", icon: "🥐", name: "Breakfast in bed", cost: 2, blurb: "Made and delivered by {them}. The crumbs are their problem too." },
+  { id: "chef", icon: "🍽️", name: "Chef’s night off", cost: 2, blurb: "Skip your turn to cook. Yes, it works on a lost Sunday dinner." },
+  { id: "picnic", icon: "🌅", name: "Sunset picnic", cost: 3, blurb: "{them} packs the basket and finds the spot. You turn up for golden hour." },
+  { id: "mystery", icon: "🕵️", name: "Remote mystery activity", cost: 3, blurb: "{them} plans a surprise to do together from afar. No spoilers until it starts." },
+  { id: "chore", icon: "🧹", name: "Chore amnesty", cost: 3, blurb: "Name a chore. It’s {them}’s for a whole week." },
+];
 
 /* ==================================================================== */
 
@@ -573,16 +635,40 @@ const state = {
   me: store.get("me", PEOPLE[0].name),
   day: null, picks: null, picksKey: null,
   view: "pets", loading: !DEMO, message: "",
+  confirm: null, busy: false,
 };
 
 function localRows() {
   if (!DEMO) state.local = state.local.filter(r => Date.now() - r.ts < 6 * 36e5);
   return state.local.map((r, i) => ({ ...r, order: 1e9 + i }));
 }
+const byTime = (a, b) => a.ts - b.ts || a.order - b.order;
 function latestByDay() {
   const map = new Map();
-  state.rows.concat(localRows()).sort((a, b) => a.ts - b.ts || a.order - b.order).forEach(r => map.set(r.who + "|" + r.day, r));
+  state.rows.concat(localRows()).filter(r => !isShop(r)).sort(byTime).forEach(r => map.set(r.who + "|" + r.day, r));
   return map;
+}
+
+/* ---------- the shop ---------- */
+// Shop rows share the form with habit logs. The habits column carries
+// "shop~buy~<voucher id>~<cost>~<item id>~<item name>", then "shop~used~<voucher id>" or "shop~refund~<voucher id>".
+function isShop(r) { return /^shop~/i.test(r.raw || ""); }
+function ledger() {
+  const bought = new Map(), closed = new Map();
+  state.rows.concat(localRows()).filter(isShop).sort(byTime).forEach(r => {
+    const [, act, id, cost, item, ...name] = r.raw.split("~");
+    if (!id) return;
+    if (act === "buy") { if (!bought.has(id)) bought.set(id, { id, who: r.who, day: r.day, cost: Math.max(0, parseFloat(cost) || 0), item, name: name.join("~") || item || "Mystery item" }); }
+    else if (act === "used" || act === "refund") closed.set(id, { status: act, closedDay: r.day });
+  });
+  return [...bought.values()].map(v => ({ status: "open", ...v, ...closed.get(v.id) }));
+}
+function walletsFor(stats, t, vouchers) {
+  const wins = weeksWon(stats, t);
+  return PEOPLE.map((p, i) => {
+    const spent = vouchers.filter(v => v.who === p.name && v.status !== "refund").reduce((a, v) => a + v.cost, 0);
+    return { p, won: wins[i], spent, left: wins[i] * CREDITS_PER_WIN - spent };
+  });
 }
 
 /* ---------- the numbers behind each pet ---------- */
@@ -653,7 +739,7 @@ function tugOfWar(stats, t) {
   return `<div class="row-split"><h2 class="h">This week</h2><span class="fine">${daysLeft ? `${plural(daysLeft, "day")} to go` : "Last day"}</span></div>
     <div class="tug-scores"><span class="sandy">${esc(stats[0].p.name)} <b>${v[0]}</b></span><span class="cat"><b>${v[1]}</b> ${esc(stats[1].p.name)}</span></div>
     <div class="rope" aria-hidden="true"><span class="s" style="flex-grow:${left}"></span><span class="c" style="flex-grow:${1 - left}"></span></div>
-    <p class="fine">${lead}. ${esc(STAKES)}.</p>`;
+    <p class="fine">${lead}. ${esc(STAKES)}, and the winner banks ${plural(CREDITS_PER_WIN, "shop credit")}.</p>`;
 }
 
 function renderPets(stats, t) {
@@ -712,14 +798,15 @@ function weekChart(stats, t) {
     <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points each week for the last ${weeks.length} weeks">${svg}</svg>`;
 }
 
-function renderScores(stats, t) {
+function renderScores(stats, t, wallets) {
   $("#tug2").innerHTML = tugOfWar(stats, t);
   $("#weekChart").innerHTML = weekChart(stats, t);
-  const wins = weeksWon(stats, t), w = weekOf(t);
+  const w = weekOf(t);
   const rows = [
     ["Total points", s => s.total],
     ["This week", s => s.weeks[w] || 0],
-    ["Weeks won", (s, i) => wins[i]],
+    ["Weeks won", (s, i) => wallets[i].won],
+    ["Shop credits", (s, i) => wallets[i].left],
     ["Current streak", s => plural(s.streak, "day")],
     ["Best streak", s => plural(s.best, "day")],
     ["Best day", s => `${s.bestDay} pts`],
@@ -739,16 +826,53 @@ function renderScores(stats, t) {
   }).join("");
 }
 
+function renderShop(wallets, vouchers) {
+  const p = me(), them = PEOPLE.find(x => x !== p), mine = wallets.find(w => w.p === p);
+  $("#view-shop").className = "view " + theme(p);
+  $("#shopSeg").innerHTML = PEOPLE.map(x => `<button type="button" class="${theme(x)}" data-who="${esc(x.name)}" aria-pressed="${x === p}">${esc(x.name)}</button>`).join("");
+  $("#wallets").innerHTML = wallets.map(w => `<article class="who ${theme(w.p)}${w.p === p ? " shopping" : ""}">
+    <h3>${esc(w.p.name)}</h3>
+    <p class="credits"><b>${w.left}</b> ${w.left === 1 ? "credit" : "credits"}</p>
+    <p class="fine num">${plural(w.won, "week")} won, ${w.spent} spent</p>
+  </article>`).join("");
+  $("#shopRule").textContent = `Score the most points in a week and you bank ${plural(CREDITS_PER_WIN, "credit")} when it ends. A tied week pays nobody.`;
+  $("#goods").innerHTML = SHOP.map(g => {
+    const key = "buy:" + g.id;
+    return `<li class="good"><span class="ico" aria-hidden="true">${g.icon}</span>
+      <span class="what"><b>${esc(g.name)}</b><span class="fine">${esc(g.blurb.replace(/\{them\}/g, them.name))}</span></span>
+      <span class="buy"><span class="price">${plural(g.cost, "credit")}</span>
+      <button type="button" class="primary small" data-act="${esc(key)}"${g.cost > mine.left ? " disabled" : ""}>${state.confirm === key ? "Confirm" : "Buy"}</button></span></li>`;
+  }).join("");
+
+  const icon = v => (SHOP.find(g => g.id === v.item) || { icon: "🎟️" }).icon;
+  const when = d => fmt(d, { day: "numeric", month: "short" });
+  const owner = v => PEOPLE.find(x => x.name === v.who) || p;
+  const open = vouchers.filter(v => v.status === "open").sort((a, b) => (a.who !== p.name) - (b.who !== p.name));
+  const used = vouchers.filter(v => v.status === "used").slice(-8).reverse();
+  const tickets = open.map(v => {
+    const o = owner(v), giver = PEOPLE.find(x => x !== o);
+    const btn = (act, label, cls) => `<button type="button" class="${cls}" data-act="${act}:${esc(v.id)}">${state.confirm === act + ":" + v.id ? "Sure?" : label}</button>`;
+    return `<div class="voucher ${theme(o)}"><span class="ico" aria-hidden="true">${icon(v)}</span>
+      <span class="what"><b>${esc(v.name)}</b><span class="fine">${esc(o.name)}’s to claim from ${esc(giver.name)}. Bought ${when(v.day)} for ${plural(v.cost, "credit")}.</span></span>
+      <span class="acts">${btn("used", "Mark used", "primary small")}${btn("refund", "Refund", "ghost")}</span></div>`;
+  }).join("");
+  $("#vouchers").innerHTML =
+    (open.length ? `<div class="vouchers">${tickets}</div>` : `<p class="fine">Nothing waiting to be claimed. Whatever you buy sits here until it’s cashed in.</p>`) +
+    (used.length ? `<ul class="spent">${used.map(v => `<li>${icon(v)} ${esc(v.name)}, cashed in by ${esc(v.who)} on ${when(v.closedDay)}</li>`).join("")}</ul>` : "");
+}
+
 function render() {
   const t = today(), latest = latestByDay();
   const stats = PEOPLE.map(p => statsFor(p, latest, t));
+  const vouchers = ledger(), wallets = walletsFor(stats, t, vouchers);
   $("#todayLabel").textContent = fmt(t, { weekday: "long", day: "numeric", month: "long" });
   const banner = $("#banner");
   const msg = state.message || (DEMO ? "Demo mode. These scores are made up, and anything you log stays on this device until the Google Form is connected." : state.loading ? "Fetching the latest scores…" : "");
   banner.hidden = !msg; banner.textContent = msg; banner.classList.toggle("error", !!state.message);
   renderPets(stats, t);
   renderLog(latest, t);
-  renderScores(stats, t);
+  renderScores(stats, t, wallets);
+  renderShop(wallets, vouchers);
   return stats;
 }
 
@@ -759,25 +883,61 @@ function toast(text) {
   el.textContent = text; el.classList.add("show");
   clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 3200);
 }
+// Sends one row to the Google Form. In demo mode nothing leaves the device.
+async function send(who, day, raw) {
+  if (DEMO) return true;
+  if (!FORM_POST_URL) { toast("Add FORM_POST_URL in the settings to save to Google Sheets."); return false; }
+  const body = new URLSearchParams();
+  body.append(ENTRY.who, who); body.append(ENTRY.date, day); body.append(ENTRY.habits, raw);
+  try { await fetch(FORM_POST_URL, { method: "POST", mode: "no-cors", body }); return true; }
+  catch (e) { toast("Couldn’t reach Google Forms. Check your connection and try again."); return false; }
+}
 async function saveDay() {
   const p = me(), t = today(), day = state.day || t;
   const habits = p.habits.filter(h => state.picks.has(cleanName(h.name))).map(h => ({ name: cleanName(h.name), pts: h.pts }));
   const row = { who: p.name, day, habits, raw: encode(habits), ts: Date.now() };
   const before = statsFor(p, latestByDay(), t);
-  if (!DEMO) {
-    if (!FORM_POST_URL) { toast("Add FORM_POST_URL in the settings to save to Google Sheets."); return; }
-    const body = new URLSearchParams();
-    body.append(ENTRY.who, p.name); body.append(ENTRY.date, day); body.append(ENTRY.habits, row.raw);
-    const btn = $("#saveBtn"); btn.disabled = true;
-    try { await fetch(FORM_POST_URL, { method: "POST", mode: "no-cors", body }); }
-    catch (e) { btn.disabled = false; toast("Couldn’t reach Google Forms. Check your connection and save again."); return; }
-    btn.disabled = false;
-  }
+  const btn = $("#saveBtn"); btn.disabled = true;
+  const sent = await send(p.name, day, row.raw);
+  btn.disabled = false;
+  if (!sent) return;
   state.local.push(row); store.set(LOCAL_KEY, state.local);
   const after = render().find(s => s.p === p), sp = SPECIES[p.pet], pts = row.habits.reduce((a, h) => a + h.pts, 0);
   if (after.stage > before.stage) toast(after.stage === 1 ? `${p.petName} hatched! Say hello to your ${sp.stages[1].toLowerCase()}.` : `${p.petName} grew into a ${sp.stages[after.stage]}!`);
   else if (!pts) toast(`Saved. Nothing logged for ${dayName(day, t)}.`);
   else toast(`Saved. ${p.petName} ${sp.ate} ${plural(pts, "point")}.`);
+}
+
+/* ---------- shop: buying, cashing in, refunding ---------- */
+// The first tap arms a button ("Confirm"), a second tap within five seconds does it.
+let confirmTimer;
+async function shopAct(key, btn) {
+  if (state.busy) return;
+  clearTimeout(confirmTimer);
+  if (state.confirm !== key) {
+    state.confirm = key; render();
+    confirmTimer = setTimeout(() => { state.confirm = null; render(); }, 5000);
+    return;
+  }
+  state.confirm = null;
+  const cut = key.indexOf(":"), act = key.slice(0, cut), id = key.slice(cut + 1);
+  const p = me(), them = PEOPLE.find(x => x !== p), t = today(), tidy = s => String(s).replace(/~/g, "-");
+  let raw, done;
+  if (act === "buy") {
+    const g = SHOP.find(x => x.id === id);
+    if (!g) { render(); return; }
+    const voucher = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    raw = ["shop", "buy", voucher, g.cost, tidy(g.id), tidy(g.name)].join("~");
+    done = `Bought: ${g.name}. Go and tell ${them.name}.`;
+  } else {
+    raw = `shop~${act}~${id}`;
+    done = act === "used" ? "Cashed in. Hope it was a good one." : "Refunded. The credits are back in the wallet.";
+  }
+  state.busy = true; btn.disabled = true;
+  const sent = await send(p.name, t, raw);
+  state.busy = false;
+  if (sent) { state.local.push({ who: p.name, day: t, habits: [], raw, ts: Date.now() }); store.set(LOCAL_KEY, state.local); toast(done); }
+  render();
 }
 
 /* ---------- loading from Google Sheets ---------- */
@@ -803,7 +963,7 @@ async function refresh() {
 }
 
 /* ---------- tabs and taps ---------- */
-const VIEWS = ["pets", "log", "scores"];
+const VIEWS = ["pets", "log", "scores", "shop"];
 function show(view, push) {
   if (!VIEWS.includes(view)) view = "pets";
   state.view = view;
@@ -816,7 +976,8 @@ document.addEventListener("click", e => {
   const b = e.target.closest("button");
   if (!b) return;
   if (b.dataset.view) show(b.dataset.view, true);
-  else if (b.dataset.who) { state.me = b.dataset.who; store.set("me", state.me); render(); }
+  else if (b.dataset.who) { state.me = b.dataset.who; store.set("me", state.me); state.confirm = null; render(); }
+  else if (b.dataset.act) shopAct(b.dataset.act, b);
   else if (b.dataset.day) { state.day = b.dataset.day; render(); }
   else if (b.dataset.h) {
     const n = b.dataset.h, on = !state.picks.has(n);
