@@ -55,7 +55,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
-button { font: inherit; color: inherit; }
+button { font: inherit; color: inherit; touch-action: manipulation; }
 :focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 [hidden] { display: none !important; }
 
@@ -105,12 +105,30 @@ button { font: inherit; color: inherit; }
 .field { display: grid; justify-items: start; gap: 8px; margin-bottom: 16px; }
 .field > span { font-weight: 600; }
 .seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 14px; background: var(--surface); border: 1px solid var(--rule); }
-.seg button, .seg label { border: 0; background: none; padding: 8px 14px; border-radius: 10px; font-weight: 700; color: var(--muted); cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--btn, var(--ink)); color: var(--on-btn); }
-.seg .pick { position: relative; overflow: hidden; display: inline-flex; align-items: center; }
-.seg .pick input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; cursor: pointer; }
-.seg .pick.on { background: var(--btn, var(--ink)); color: var(--on-btn); }
-.seg .pick:focus-within { outline: 3px solid var(--ink); outline-offset: 2px; }
+.seg button { border: 0; background: none; padding: 8px 14px; border-radius: 10px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"], .seg button.on { background: var(--btn, var(--ink)); color: var(--on-btn); }
+.seg .cal-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.chev { width: 12px; height: 12px; flex: none; transition: transform .2s ease; }
+[aria-expanded="true"] > .chev { transform: rotate(180deg); }
+
+/* Day picker */
+.cal { justify-self: stretch; width: 100%; max-width: 380px; padding: 8px 10px 12px; border-radius: 18px; border: 1px solid var(--rule); background: var(--surface); }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.cal-head b { font-weight: 700; }
+.cal-nav { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 12px; background: none; cursor: pointer; }
+.cal-nav svg { width: 18px; height: 18px; }
+.cal-nav:disabled { opacity: .3; cursor: default; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-dow { padding: 4px 0; text-align: center; font-size: .75rem; font-weight: 700; color: var(--muted); }
+.cal-day { position: relative; height: 44px; border: 0; border-radius: 12px; background: none; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; }
+.cal-day:not(:disabled):not([aria-pressed="true"]):hover { background: var(--tint); }
+.cal-day[aria-current="date"] { box-shadow: inset 0 0 0 1.5px var(--rule); }
+.cal-day[aria-pressed="true"] { background: var(--btn); color: var(--on-btn); box-shadow: none; }
+.cal-day:disabled { color: var(--muted); opacity: .45; cursor: default; }
+.cal-day.logged::after, .cal-dot { content: ""; display: block; width: 5px; height: 5px; border-radius: 50%; background: var(--fill); }
+.cal-day.logged::after { position: absolute; left: 50%; bottom: 6px; margin-left: -2.5px; }
+.cal-day[aria-pressed="true"]::after { background: var(--on-btn); }
+.cal-key { display: flex; align-items: center; gap: 6px; margin: 8px 0 0 4px; }
 .habits { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 8px; }
 .habit { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--rule); background: var(--surface); text-align: left; cursor: pointer; }
 .habit[aria-pressed="true"] { background: var(--tint); border-color: var(--fill); }
@@ -119,6 +137,7 @@ button { font: inherit; color: inherit; }
 .habit[aria-pressed="true"] .box { background: var(--btn); border-color: var(--btn); }
 .habit[aria-pressed="true"] .box svg { opacity: 1; }
 .habit .name { flex: 1; font-weight: 600; }
+.habit .old { display: block; font-weight: 500; }
 .habit .pts { font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; }
 .save { display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
 .primary { border: 0; border-radius: 14px; padding: 14px 22px; background: var(--btn); color: var(--on-btn); font-weight: 800; font-size: 1.0625rem; cursor: pointer; }
@@ -197,7 +216,7 @@ table.rec { width: 100%; border-collapse: collapse; font-variant-numeric: tabula
   .consistency { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .toast, .rope span { transition: none; }
+  .toast, .rope span, .chev { transition: none; }
 }
 </style>
 </head>
@@ -218,7 +237,7 @@ table.rec { width: 100%; border-collapse: collapse; font-variant-numeric: tabula
   <section class="view" id="view-log" aria-label="Log a day" hidden>
     <h2 class="h log-head">Log a day</h2>
     <div class="field"><span>Who’s logging</span><div class="seg" id="whoSeg"></div></div>
-    <div class="field"><span>Day</span><div class="seg" id="daySeg"></div></div>
+    <div class="field"><span>Day</span><div class="seg" id="daySeg"></div><div class="cal" id="cal" hidden></div></div>
     <ul class="habits" id="habitList"></ul>
     <div class="save">
       <button class="primary" id="saveBtn" type="button">Save day</button>
@@ -633,19 +652,43 @@ const state = {
   rows: DEMO ? demoRows() : [],
   local: store.get(LOCAL_KEY, []),
   me: store.get("me", PEOPLE[0].name),
-  day: null, picks: null, picksKey: null,
+  day: null, dayFor: null, cal: null, // cal = first of the month showing in the day picker, or null when it's shut
+  picks: null, picksBase: null, picksKey: null, picksFrom: null, list: [], saved: null,
   view: "pets", loading: !DEMO, message: "",
   confirm: null, busy: false,
 };
 
-function localRows() {
-  if (!DEMO) state.local = state.local.filter(r => Date.now() - r.ts < 6 * 36e5);
-  return state.local.map((r, i) => ({ ...r, order: 1e9 + i }));
-}
+/* ---------- saves from this phone that the sheet hasn't caught up with ---------- */
+// Google stamps rows in the spreadsheet's own time zone, which needn't match this
+// phone's, so sheet times are only ever compared with each other. Anything saved here
+// overrides the sheet until the sheet shows it. `seen` counts identical rows that
+// already existed at save time, so an older identical save isn't mistaken for this one.
+const KEEP_PENDING = 6 * 36e5;
+const rowKey = r => r.who + "|" + r.day;
+const sameRow = (a, b) => a.who === b.who && a.day === b.day && a.raw === b.raw;
 const byTime = (a, b) => a.ts - b.ts || a.order - b.order;
+function prune() { if (!DEMO) state.local = state.local.filter(r => Date.now() - r.ts < KEEP_PENDING); }
+function pendingRows() {
+  prune();
+  return state.local.map((r, i) => ({ ...r, order: 1e9 + i, pending: true })).sort(byTime);
+}
+function allRows() { return state.rows.slice().sort(byTime).concat(pendingRows()); }
+function remember(row) {
+  prune();
+  row.seen = state.rows.filter(r => sameRow(r, row)).length + state.local.filter(r => sameRow(r, row)).length;
+  state.local.push(row); store.set(LOCAL_KEY, state.local);
+}
+function loadSheet(text) {
+  state.rows = rowsFromCSV(text);
+  const landed = state.local.filter(p => state.rows.filter(r => sameRow(r, p)).length > (p.seen || 0));
+  // Once a save has landed, older saves of that same day from this phone are out of date too.
+  state.local = state.local.filter(p => !landed.includes(p) &&
+    !landed.some(l => !isShop(l) && !isShop(p) && rowKey(l) === rowKey(p) && l.ts > p.ts));
+  store.set(LOCAL_KEY, state.local);
+}
 function latestByDay() {
   const map = new Map();
-  state.rows.concat(localRows()).filter(r => !isShop(r)).sort(byTime).forEach(r => map.set(r.who + "|" + r.day, r));
+  allRows().forEach(r => { if (!isShop(r)) map.set(rowKey(r), r); });
   return map;
 }
 
@@ -655,7 +698,7 @@ function latestByDay() {
 function isShop(r) { return /^shop~/i.test(r.raw || ""); }
 function ledger() {
   const bought = new Map(), closed = new Map();
-  state.rows.concat(localRows()).filter(isShop).sort(byTime).forEach(r => {
+  allRows().filter(isShop).forEach(r => {
     const [, act, id, cost, item, ...name] = r.raw.split("~");
     if (!id) return;
     if (act === "buy") { if (!bought.has(id)) bought.set(id, { id, who: r.who, day: r.day, cost: Math.max(0, parseFloat(cost) || 0), item, name: name.join("~") || item || "Mystery item" }); }
@@ -756,27 +799,82 @@ const CHECK = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke
 function me() { return PEOPLE.find(p => p.name === state.me) || PEOPLE[0]; }
 function dayName(d, t) { return d === t ? "today" : d === addDays(t, -1) ? "yesterday" : fmt(d, { weekday: "long", day: "numeric", month: "short" }); }
 
+const sameSet = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
+const CHEVRON = `<svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg>`;
+const ARROW = d => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+
 function renderLog(latest, t) {
   const p = me();
-  if (!state.day || state.day > t) state.day = t;
-  const key = p.name + "|" + state.day, saved = latest.get(key);
-  if (state.picksKey !== key) { state.picks = new Set(saved ? saved.habits.map(h => h.name) : []); state.picksKey = key; }
+  // A day picked before midnight goes back to today once the date changes.
+  if (!state.day || state.day > t || state.dayFor !== t) { state.day = t; state.dayFor = t; state.cal = null; }
+  const key = p.name + "|" + state.day, saved = latest.get(key) || null;
+  const from = saved ? `${saved.raw}@${saved.ts}${saved.pending ? "+" : ""}` : "";
+  // The ticks follow whatever's saved for the day, including saves from the other phone,
+  // unless they've been changed here and not saved yet.
+  const edited = state.picksKey === key && !sameSet(state.picks, state.picksBase);
+  if (state.picksKey !== key || (!edited && state.picksFrom !== from)) {
+    state.picksBase = new Set(saved ? saved.habits.map(h => h.name) : []);
+    state.picks = new Set(state.picksBase);
+    state.picksKey = key; state.picksFrom = from;
+  }
+  state.saved = saved;
+  // Habits logged that day but since taken off the list stay tickable, so saving again keeps them.
+  state.list = p.habits.map(h => ({ key: cleanName(h.name), name: h.name, pts: h.pts }));
+  (saved ? saved.habits : []).forEach(h => { if (!state.list.some(x => x.key === h.name)) state.list.push({ key: h.name, name: h.name, pts: h.pts, old: true }); });
+  $("#view-log").className = "view " + theme(p);
   $("#whoSeg").innerHTML = PEOPLE.map(x => `<button type="button" class="${theme(x)}" data-who="${esc(x.name)}" aria-pressed="${x === p}">${esc(x.name)}</button>`).join("");
+  renderDays(p, latest, t);
+  $("#habitList").innerHTML = state.list.map(h => `<li><button type="button" class="habit" data-h="${esc(h.key)}" aria-pressed="${state.picks.has(h.key)}"><span class="box">${CHECK}</span><span class="name">${esc(h.name)}${h.old ? `<span class="fine old">No longer on the list</span>` : ""}</span><span class="pts">+${h.pts}</span></button></li>`).join("");
+  updateFooter();
+}
+function renderDays(p, latest, t) {
   const y = addDays(t, -1), other = state.day !== t && state.day !== y;
   $("#daySeg").innerHTML = `<button type="button" data-day="${t}" aria-pressed="${state.day === t}">Today</button>
     <button type="button" data-day="${y}" aria-pressed="${state.day === y}">Yesterday</button>
-    <label class="pick${other ? " on" : ""}"><span>${other ? fmt(state.day, { weekday: "short", day: "numeric", month: "short" }) : "Earlier"}</span><input type="date" id="dayPick" max="${t}" value="${other ? state.day : ""}" aria-label="Pick an earlier day"></label>`;
-  $("#view-log").className = "view " + theme(p);
-  $("#habitList").innerHTML = p.habits.map(h => {
-    const n = cleanName(h.name);
-    return `<li><button type="button" class="habit" data-h="${esc(n)}" aria-pressed="${state.picks.has(n)}"><span class="box">${CHECK}</span><span class="name">${esc(h.name)}</span><span class="pts">+${h.pts}</span></button></li>`;
-  }).join("");
-  updateTotal();
-  $("#saveNote").textContent = saved ? `Already logged for ${dayName(state.day, t)}. Saving again replaces it.` : "";
+    <button type="button" class="cal-toggle${other ? " on" : ""}" data-cal="toggle" aria-expanded="${!!state.cal}" aria-controls="cal">${other ? fmt(state.day, { weekday: "short", day: "numeric", month: "short" }) : "Earlier"}${CHEVRON}</button>`;
+  const cal = $("#cal");
+  cal.hidden = !state.cal;
+  cal.innerHTML = state.cal ? calendar(p, latest, t) : "";
 }
-function updateTotal() {
-  const n = me().habits.filter(h => state.picks.has(cleanName(h.name))).reduce((a, h) => a + h.pts, 0);
+// A month of days to pick from. Days with points logged get a dot; future days are off.
+function calendar(p, latest, t) {
+  const first = fromYmd(state.cal), yr = first.getFullYear(), mo = first.getMonth();
+  const length = new Date(yr, mo + 1, 0).getDate(), next = ymd(new Date(yr, mo + 1, 1));
+  let cells = "<span></span>".repeat((first.getDay() + 6) % 7);
+  for (let n = 1; n <= length; n++) {
+    const d = ymd(new Date(yr, mo, n)), r = latest.get(p.name + "|" + d);
+    const pts = r ? r.habits.reduce((a, h) => a + h.pts, 0) : 0;
+    const label = `${fmt(d, { weekday: "long", day: "numeric", month: "long" })}, ${r ? plural(pts, "point") : "nothing logged"}`;
+    cells += `<button type="button" class="cal-day${pts ? " logged" : ""}" data-day="${d}" aria-pressed="${d === state.day}"${d === t ? ' aria-current="date"' : ""}${d > t ? " disabled" : ""} aria-label="${label}">${n}</button>`;
+  }
+  return `<div class="cal-head">
+      <button type="button" class="cal-nav" data-cal="-1" aria-label="Previous month">${ARROW("M10 3.5L5.5 8l4.5 4.5")}</button>
+      <b>${fmt(state.cal, { month: "long", year: "numeric" })}</b>
+      <button type="button" class="cal-nav" data-cal="1" aria-label="Next month"${next > t ? " disabled" : ""}>${ARROW("M6 3.5l4.5 4.5L6 12.5")}</button>
+    </div>
+    <div class="cal-grid">${["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(x => `<span class="cal-dow" aria-hidden="true">${x}</span>`).join("")}${cells}</div>
+    <p class="fine cal-key"><span class="cal-dot" aria-hidden="true"></span>Days ${esc(p.name)} logged points</p>`;
+}
+function pickDay(d) { state.day = d; state.dayFor = today(); state.cal = null; render(); }
+function moveCalendar(how) {
+  const t = today();
+  if (how === "toggle") {
+    const other = state.day !== t && state.day !== addDays(t, -1);
+    state.cal = state.cal ? null : (other ? state.day : addDays(t, -2)).slice(0, 8) + "01";
+  } else {
+    const m = fromYmd(state.cal);
+    state.cal = ymd(new Date(m.getFullYear(), m.getMonth() + Number(how), 1));
+  }
+  render();
+}
+function updateFooter() {
+  const n = state.list.filter(h => state.picks.has(h.key)).reduce((a, h) => a + h.pts, 0);
   $("#dayTotal").innerHTML = `<b>${n}</b> ${n === 1 ? "point" : "points"}`;
+  const s = state.saved, when = dayName(state.day, today());
+  $("#saveNote").textContent = !sameSet(state.picks, state.picksBase) ? (s ? `Not saved yet. Saving replaces what’s logged for ${when}.` : "Not saved yet.")
+    : !s ? ""
+    : s.pending && !DEMO ? "Saved. The other phone will see it once Google Sheets catches up, usually within 5 minutes."
+    : `Already logged for ${when}. Saving again replaces it.`;
 }
 
 function weekChart(stats, t) {
@@ -893,16 +991,21 @@ async function send(who, day, raw) {
   catch (e) { toast("Couldn’t reach Google Forms. Check your connection and try again."); return false; }
 }
 async function saveDay() {
-  const p = me(), t = today(), day = state.day || t;
-  const habits = p.habits.filter(h => state.picks.has(cleanName(h.name))).map(h => ({ name: cleanName(h.name), pts: h.pts }));
-  const row = { who: p.name, day, habits, raw: encode(habits), ts: Date.now() };
-  const before = statsFor(p, latestByDay(), t);
-  const btn = $("#saveBtn"); btn.disabled = true;
+  const btn = $("#saveBtn");
+  if (btn.disabled) return;
+  const p = me(), day = state.day || today(), key = p.name + "|" + day;
+  const habits = state.list.filter(h => state.picks.has(h.key)).map(h => ({ name: h.key, pts: h.pts }));
+  const row = { who: p.name, day, habits, raw: encode(habits) };
+  btn.disabled = true;
+  // Just opened? Give the first load a moment, so this save is compared with the sheet rather than an old copy.
+  if (state.loading) await Promise.race([firstLoad, new Promise(r => setTimeout(r, 4000))]);
   const sent = await send(p.name, day, row.raw);
   btn.disabled = false;
   if (!sent) return;
-  state.local.push(row); store.set(LOCAL_KEY, state.local);
-  const after = render().find(s => s.p === p), sp = SPECIES[p.pet], pts = row.habits.reduce((a, h) => a + h.pts, 0);
+  const t = today(), before = statsFor(p, latestByDay(), t);
+  row.ts = Date.now(); remember(row);
+  if (state.picksKey === key) state.picksBase = new Set(habits.map(h => h.name));
+  const after = render().find(s => s.p === p), sp = SPECIES[p.pet], pts = habits.reduce((a, h) => a + h.pts, 0);
   if (after.stage > before.stage) toast(after.stage === 1 ? `${p.petName} hatched! Say hello to your ${sp.stages[1].toLowerCase()}.` : `${p.petName} grew into a ${sp.stages[after.stage]}!`);
   else if (!pts) toast(`Saved. Nothing logged for ${dayName(day, t)}.`);
   else toast(`Saved. ${p.petName} ${sp.ate} ${plural(pts, "point")}.`);
@@ -936,24 +1039,27 @@ async function shopAct(key, btn) {
   state.busy = true; btn.disabled = true;
   const sent = await send(p.name, t, raw);
   state.busy = false;
-  if (sent) { state.local.push({ who: p.name, day: t, habits: [], raw, ts: Date.now() }); store.set(LOCAL_KEY, state.local); toast(done); }
+  if (sent) { remember({ who: p.name, day: t, habits: [], raw, ts: Date.now() }); toast(done); }
   render();
 }
 
 /* ---------- loading from Google Sheets ---------- */
+let fetches = 0, newestApplied = 0;
 async function refresh() {
   if (DEMO) return;
+  const n = ++fetches;
   try {
     const res = await fetch(CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "t=" + Date.now());
     if (!res.ok) throw new Error("HTTP " + res.status);
     const text = await res.text();
     if (/^\s*</.test(text)) throw new Error("not CSV");
-    state.rows = rowsFromCSV(text);
+    if (n < newestApplied) return; // a later fetch has already landed; don't wind it back
+    newestApplied = n;
+    loadSheet(text);
     store.set("cache", text);
-    state.local = state.local.filter(p => !state.rows.some(r => r.who === p.who && r.day === p.day && r.raw === p.raw));
-    store.set(LOCAL_KEY, state.local);
     state.message = "";
   } catch (e) {
+    if (n < newestApplied) return;
     state.message = state.rows.length
       ? "Showing the last scores this device saw. Couldn’t reach Google Sheets just now."
       : "Couldn’t load scores from Google Sheets. Check CSV_URL is the ‘Publish to web’ CSV link for the responses sheet.";
@@ -972,27 +1078,39 @@ function show(view, push) {
   if (push) { try { history.replaceState(null, "", view === "pets" ? location.pathname + location.search : "#" + view); } catch (e) { /* sandboxed preview */ } window.scrollTo(0, 0); }
 }
 document.addEventListener("click", e => {
-  if (e.target.id === "dayPick") { try { e.target.showPicker(); } catch (err) { /* the browser opens its own picker */ } return; }
-  const b = e.target.closest("button");
-  if (!b) return;
-  if (b.dataset.view) show(b.dataset.view, true);
-  else if (b.dataset.who) { state.me = b.dataset.who; store.set("me", state.me); state.confirm = null; render(); }
-  else if (b.dataset.act) shopAct(b.dataset.act, b);
-  else if (b.dataset.day) { state.day = b.dataset.day; render(); }
-  else if (b.dataset.h) {
-    const n = b.dataset.h, on = !state.picks.has(n);
-    on ? state.picks.add(n) : state.picks.delete(n);
-    b.setAttribute("aria-pressed", on); updateTotal();
-  } else if (b.id === "saveBtn") saveDay();
+  const b = e.target.closest("button"), keyboard = e.detail === 0;
+  const nearDays = e.target.closest("#cal, #daySeg, #whoSeg");
+  if (b) {
+    if (b.dataset.view) show(b.dataset.view, true);
+    else if (b.dataset.who) { state.me = b.dataset.who; store.set("me", state.me); state.confirm = null; render(); }
+    else if (b.dataset.act) shopAct(b.dataset.act, b);
+    else if (b.dataset.day) {
+      const fromCalendar = !!b.closest("#cal");
+      pickDay(b.dataset.day);
+      if (keyboard && fromCalendar) $("#daySeg .cal-toggle").focus();
+    } else if (b.dataset.cal) {
+      const how = b.dataset.cal;
+      moveCalendar(how);
+      if (keyboard) { const again = $(`[data-cal="${how}"]`); if (again) again.focus(); }
+    } else if (b.dataset.h) {
+      const n = b.dataset.h, on = !state.picks.has(n);
+      on ? state.picks.add(n) : state.picks.delete(n);
+      b.setAttribute("aria-pressed", on); updateFooter();
+    } else if (b.id === "saveBtn") saveDay();
+  }
+  // A tap anywhere else shuts the day picker.
+  if (state.cal && !nearDays) { state.cal = null; render(); }
 });
-document.addEventListener("change", e => { if (e.target.id === "dayPick" && e.target.value) { state.day = e.target.value; render(); } });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && state.cal) { state.cal = null; render(); $("#daySeg .cal-toggle").focus(); }
+});
 window.addEventListener("hashchange", () => show(location.hash.slice(1)));
 document.addEventListener("visibilitychange", () => { if (!document.hidden) { render(); refresh(); } });
 
-if (!DEMO) { const cached = store.get("cache", ""); if (cached) state.rows = rowsFromCSV(cached); }
+if (!DEMO) { const cached = store.get("cache", ""); if (cached) loadSheet(cached); }
 render();
 show(location.hash.slice(1));
-refresh();
+const firstLoad = refresh();
 if (!DEMO) setInterval(() => { if (!document.hidden) refresh(); }, 120000);
 
 </script>
