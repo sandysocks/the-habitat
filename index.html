@@ -486,6 +486,7 @@ const ENTRY = { who: "entry.1964647304", date: "entry.602429836", habits: "entry
 
 // Your habits. pts = points for doing it on a given day.
 // Keep both lists adding up to about the same total so it's a fair fight.
+// Renaming a habit? Put its old name in `was` so days logged under the old name still count towards it.
 const PEOPLE = [
   { name: "Sandy", pet: "dog", petName: "Kibo", weeklyTarget: 45, habits: [
     { name: "Meditate", pts: 4 },
@@ -494,10 +495,9 @@ const PEOPLE = [
     { name: "Push-ups", pts: 2 },
   ] },
   { name: "Cat", pet: "otter", petName: "Pebble", weeklyTarget: 45, habits: [
-    { name: "Read for 5 min", pts: 2 },
+    { name: "Read for 5 min", pts: 3 },
     { name: "Dead hang", pts: 2 },
-    { name: "Drink 2L of water", pts: 1 },
-    { name: "In bed by 10:00pm", pts: 1 },
+    { name: "In bed by 10:30pm", pts: 1, was: ["In bed by 10:00pm"] },
     { name: "Reply to texts for 5 min", pts: 4 },
   ] },
 ];
@@ -582,9 +582,11 @@ function decode(text, person) {
   if (!text || text.trim().toLowerCase() === "none") return [];
   return text.split("|").map(part => {
     const i = part.lastIndexOf(":");
-    const name = (i > 0 ? part.slice(0, i) : part).trim();
+    let name = (i > 0 ? part.slice(0, i) : part).trim();
     let pts = i > 0 ? parseFloat(part.slice(i + 1)) : NaN;
-    if (!isFinite(pts)) { const h = person.habits.find(x => cleanName(x.name) === name); pts = h ? h.pts : 1; }
+    const h = person.habits.find(x => cleanName(x.name) === name) || person.habits.find(x => (x.was || []).some(w => cleanName(w) === name));
+    if (h) name = cleanName(h.name); // logged under an old name: count it as the habit it became
+    if (!isFinite(pts)) pts = h ? h.pts : 1;
     return { name, pts };
   }).filter(h => h.name);
 }
@@ -818,9 +820,11 @@ function renderLog(latest, t) {
     state.picksKey = key; state.picksFrom = from;
   }
   state.saved = saved;
-  // Habits logged that day but since taken off the list stay tickable, so saving again keeps them.
-  state.list = p.habits.map(h => ({ key: cleanName(h.name), name: h.name, pts: h.pts }));
-  (saved ? saved.habits : []).forEach(h => { if (!state.list.some(x => x.key === h.name)) state.list.push({ key: h.name, name: h.name, pts: h.pts, old: true }); });
+  // Logged habits keep the points they were logged with, so saving an old day again doesn't re-score it,
+  // and habits since taken off the list stay tickable so saving again keeps them.
+  const logged = new Map((saved ? saved.habits : []).map(h => [h.name, h.pts]));
+  state.list = p.habits.map(h => { const key = cleanName(h.name); return { key, name: h.name, pts: logged.has(key) ? logged.get(key) : h.pts }; });
+  logged.forEach((pts, key) => { if (!state.list.some(x => x.key === key)) state.list.push({ key, name: key, pts, old: true }); });
   $("#view-log").className = "view " + theme(p);
   $("#whoSeg").innerHTML = PEOPLE.map(x => `<button type="button" class="${theme(x)}" data-who="${esc(x.name)}" aria-pressed="${x === p}">${esc(x.name)}</button>`).join("");
   renderDays(p, latest, t);
