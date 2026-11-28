@@ -2,15 +2,16 @@
 
 // Saving works like The Habitat: a Google Form writes rows, and the page reads the sheet back.
 //  1. Make a new Google Form with three short-answer questions: "Who", "Date" and "Status".
-//  2. Responses → Link to Sheets. In the sheet: File → Share → Publish to web → the
-//     responses tab, as CSV. That link goes in CSV_URL.
+//  2. Responses → Link to Sheets, then share the sheet as "Anyone with the link can view".
+//     CSV_URL reads its responses tab as CSV: swap in the sheet's ID and the tab's gid.
+//     (A "Publish to web" CSV link works too.)
 //  3. In the form: ⋮ → Get pre-filled link, type anything in each box, copy the link.
 //     The entry.123… numbers in it go in ENTRY, in the same order as the questions.
 //  4. FORM_POST_URL is the form's address with /viewform swapped for /formResponse.
 // Leave CSV_URL blank to see made-up demo data.
-const CSV_URL = "";
-const FORM_POST_URL = "";
-const ENTRY = { who: "entry.0000000001", date: "entry.0000000002", status: "entry.0000000003" };
+const CSV_URL = "https://docs.google.com/spreadsheets/d/1V_zhTWqKJFHvPcw3MjZU7mLE6_3DuP4sLyFrhhrdhOE/gviz/tq?tqx=out:csv&headers=1&gid=2114188182";
+const FORM_POST_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfGxcZRpDVPuUG-2q2uBBOmvadColaoT5MXB60hsslMhKsAhw/formResponse";
+const ENTRY = { who: "entry.1347132005", date: "entry.22024408", status: "entry.1663218690" };
 
 const TWINS = [
   { name: "Cat", key: "cat" },
